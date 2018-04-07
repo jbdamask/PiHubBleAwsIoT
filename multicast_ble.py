@@ -6,16 +6,6 @@ def DBG(*args):
     msg = " ".join([str(a) for a in args])
     print(msg)
 
-class ScanDelegate(DefaultDelegate):
-    def __init__(self):
-        DefaultDelegate.__init__(self)
-
-    def handleDiscovery(self, dev, isNewDev, isNewData):
-        if isNewDev:
-            print "Discovered device", dev.addr
-        elif isNewData:
-            print "Received new data from", dev.addr
-
 class MyDelegate(DefaultDelegate):
 
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
