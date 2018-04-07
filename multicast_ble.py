@@ -20,8 +20,9 @@ class MyDelegate(DefaultDelegate):
 
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
-    def __init__(self):
+    def __init__(self, addr):
         DefaultDelegate.__init__(self)
+	self.id = addr
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
@@ -30,17 +31,19 @@ class MyDelegate(DefaultDelegate):
         map(self.broadcast, peripherals.values())
 
     def broadcast(self, p):
+	if(self.id == p.addr):
+	    return
 	print "In broadcast for: " + p.addr
 	tx = p.getCharacteristics(uuid="6e400002-b5a3-f393-e0a9-e50e24dcca9e")[0]
-	print ( binascii.b2a_hex(self.d) )
+	print (binascii.b2a_hex(self.d).decode('utf-8'))
         try:
 #            tx = p.getCharacteristics(uuid=self.txUUID)[0]
-#            tx.write( binascii.unhexlify(self.d), True )
-	    tx.write( self.d, True)
+	    print self.id + " Characteristic: " + tx.propertiesToString()
+            tx.write( binascii.unhexlify(self.d).decode('utf-8'), True )
+#	    tx.write( self.d, True)
         except Exception:
 	    print "Error writing to tx for peripheral: " + p.addr
             print Exception.message
-
         
 
 class BleThread(threading.Thread):
@@ -55,7 +58,7 @@ class BleThread(threading.Thread):
         with lock:
             peripheral = peripherals[self.peripheral_addr]
         try:
-            m = MyDelegate()
+            m = MyDelegate(self.peripheral_addr)
             peripheral.setDelegate(m)
             self.rxh = peripheral.getCharacteristics(uuid=self.rxUUID)[0]
             print " Configuring RX to notify me on change"
