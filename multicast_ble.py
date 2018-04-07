@@ -1,5 +1,5 @@
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
-import threading, binascii
+import threading, binascii, sys
 
 
 def DBG(*args):
@@ -88,7 +88,8 @@ while True:
             # Note, it would be nice to remove a device when it goes offline as opposed to when it comes back
             # To do this I'd need something like a ping...dunno what best practice is
             if d.addr in peripherals:
-                del peripherals[d.addr]
+	        with lock:
+                    del peripherals[d.addr]
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
