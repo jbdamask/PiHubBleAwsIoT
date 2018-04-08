@@ -16,30 +16,18 @@ class MyDelegate(DefaultDelegate):
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
-	DBG("Notification:", cHandle, " send data ", binascii.b2a_hex(data))
+	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
 	self.d = data
         map(self.broadcast, peripherals.values())
 
     def broadcast(self, p):
-	if(self.id == p.addr):
-	    return
-	print "In broadcast for: " + p.addr
-	tx = p.getCharacteristics(uuid="6e400002-b5a3-f393-e0a9-e50e24dcca9e")[0]
-	print (binascii.b2a_hex(self.d).decode('utf-8'))
-        try:
-#            tx = p.getCharacteristics(uuid=self.txUUID)[0]
-	    print self.id + " Characteristic: " + tx.propertiesToString()
-            tx.write( binascii.unhexlify(self.d).decode('utf-8'), True )
-#	    tx.write( self.d, True)
-        except Exception:
-	    print "Error writing to tx for peripheral: " + p.addr
-            print Exception.message
-        
+    	if(self.id == p.addr):
+            return
+        txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
+        txh.write(self.d, True)
 
 class BleThread(threading.Thread):
-    # Currently only tx, rx and NOTIFY are supported
-    rxUUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
-
+    
     def __init__(self, peripheral_addr):
         threading.Thread.__init__(self)
         self.peripheral_addr = peripheral_addr
@@ -50,7 +38,6 @@ class BleThread(threading.Thread):
         try:
             m = MyDelegate(self.peripheral_addr)
             peripheral.setDelegate(m)
-            self.rxh = peripheral.getCharacteristics(uuid=self.rxUUID)[0]
             print " Configuring RX to notify me on change"
             peripheral.writeCharacteristic(35, b"\x01\x00", withResponse=True)
             print " Subscribed..."
@@ -70,7 +57,6 @@ _devicesToFind = "Adafruit Bluefruit LE"
 peripherals = {}
 scanner = Scanner(0)
 lock = threading.RLock()
-#counter = 1001
 
 while True:
     devices = scanner.scan(2)
@@ -87,7 +73,6 @@ while True:
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
                     try:
-                        #p = Peripheral(d)
                         p = Peripheral(d.addr, "random")
                         print " Created Peripheral object for device: " + d.addr
                         print " Appending " + d.addr + " to list of connected devices"
