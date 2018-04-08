@@ -23,7 +23,8 @@ class MyDelegate(DefaultDelegate):
     def broadcast(self, p):
     	if(self.id == p.addr):
             return
-        txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
+	with lock:
+	    txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
         txh.write(self.d, True)
 
 class BleThread(threading.Thread):
@@ -48,9 +49,24 @@ class BleThread(threading.Thread):
             print BaseException.message
 
         while True:
-#            print "wating for notification from " + self.peripheral_addr
-            if peripheral.waitForNotifications(1):
-                continue
+	    try:
+                if peripheral.waitForNotifications(1):
+                    continue
+ 	    except BTLEException:
+		print "BTLEException caught from peripheral " + peripheral.addr
+		print BTLEException.message
+		peripheral.disconnect()
+		break
+	    except BaseException:
+		print "BaseException acught from peripheral " + peripheral.addr
+		print BaseException.message
+		peripheral.disconnect()
+		break
+	    except Exception:
+		print "Caught unknown exception from peripheral " + peripheral.addr
+		print Exception.message
+		peripheral.disconnect()
+		break
 
 
 _devicesToFind = "Adafruit Bluefruit LE"
