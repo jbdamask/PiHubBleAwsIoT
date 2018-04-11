@@ -1,5 +1,6 @@
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
 import threading, binascii, sys
+from Queue import Queue
 
 
 def DBG(*args):
@@ -16,6 +17,11 @@ class MyDelegate(DefaultDelegate):
     def handleNotification(self, cHandle, data):
 	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
 	self.d = data
+    global lock
+    global state
+    with lock:
+        state = data
+
 
 class BleThread(Peripheral, threading.Thread):
     
@@ -29,45 +35,59 @@ class BleThread(Peripheral, threading.Thread):
 
     def __init__(self, peripheral_addr):
         threading.Thread.__init__(self)
-	Peripheral.__init__(self, peripheral_addr, addrType = "random")
-	self.delegate = MyDelegate(peripheral_addr)
-	self.withDelegate(self.delegate)
-	self.connected = True
-	self.featherState = ""
+        global lock
+        global state
+    	Peripheral.__init__(self, peripheral_addr, addrType = "random")
+    	self.delegate = MyDelegate(peripheral_addr)
+    	self.withDelegate(self.delegate)
+    	self.connected = True
+    	self.featherState = ""
+
         print " Configuring RX to notify me on change"
         try:
-	    self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
-	except BaseException:
-	    print "BaseException caught when subscribing to notifications for:  " + self.addr
+            self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
+    	except BaseException:
+            print "BaseException caught when subscribing to notifications for:  " + self.addr
             print BaseException.message
-	    raise
+    	    raise
 
     def run(self):
-	print "Starting Thread " + self.addr
+        print "Starting Thread " + self.addr
         while self.connected:
-	    try:
+    	    try:
                 if self.waitForNotifications(self.WAIT_TIME):
-		    if self.featherState != self.delegate.d:
-			self.featherState = self.delegate.d
-        	        map(self.broadcast, peripherals.values())  # This is where failure occurs
-	    except BaseException, e:
-		print "BaseException caught: " + e.message	# This is most commonly caught error
-		self.connected = False
- 	    except BTLEException, e:
-		print "BTLEException caught from peripheral " + self.addr
-		print BTLEException.message
-		if str(e) == 'Device disconnected':
-		    print self.addr + " disconnected"
-		    self.connected = False
+                    if self.featherState != self.delegate.d:
+                        self.featherState = self.delegate.d
+                        #map(self.broadcast, peripherals.values())  # This is where failure occurs
+    	    except BaseException, e:
+                print "BaseException caught: " + e.message	# This is most commonly caught error
+                self.connected = False
+            except BTLEException, e:
+                print "BTLEException caught from peripheral " + self.addr
+                print BTLEException.message
+                if str(e) == 'Device disconnected':
+                    print self.addr + " disconnected"
+                    self.connected = False
                     # We don't want to call waitForNotifications and fail too often
                     time.sleep(self.EXCEPTION_WAIT_TIME)
-		else:
-		    raise
-	    except Exception:
-		print "Caught unknown exception from peripheral " + self.addr
-		print Exception.message
-		self.connected = False
-		break
+                else:
+                    raise
+    	    except Exception:
+                print "Caught unknown exception from peripheral " + self.addr
+                print Exception.message
+                self.connected = False
+
+        # Synchronize the feather's state with the global one
+        with lock:
+            if self.featherState != state:
+                txh = self.getCharacteristics(uuid=self.txUUID)[0]
+                try:
+                    txh.write(self.featherState, True) # Note, this succeeds
+                    self.featherState = state
+                except BTLEException:
+                    print BTLEException.message
+
+    		
 
     def broadcast(self, p):
         if(self.addr == p.addr):
@@ -75,7 +95,7 @@ class BleThread(Peripheral, threading.Thread):
         with lock:
             txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
         try:
-	    txh.write(self.featherState, True) # Note, this succeeds
+	       txh.write(self.featherState, True) # Note, this succeeds
         except BTLEException:
             print BTLEException.message
 
@@ -84,6 +104,13 @@ _devicesToFind = "Adafruit Bluefruit LE"
 peripherals = {}
 scanner = Scanner(0)
 lock = threading.RLock()
+# I considered a Queue but it's not the right construct for sharing state between threads.
+# Note I only want to hold a single state. A potential bug is that the Queue will block new puts until the item is consumed.
+# Wait, this isn't the behavior I want. I want a state to be recorded so that multiple threads can get it. Queues are like stacks
+# and Queue.get will remove and return an item. Not what I want. 
+#queue = Queue(maxsize=1) 
+state = ""
+
 
 while True:
     devices = scanner.scan(2)
