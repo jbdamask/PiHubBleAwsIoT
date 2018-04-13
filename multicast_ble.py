@@ -1,6 +1,5 @@
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
 import threading, binascii, sys
-from Queue import Queue
 
 
 def DBG(*args):
@@ -17,10 +16,13 @@ class MyDelegate(DefaultDelegate):
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
 	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
-	self.d = data
-        global state
-        with self.lock:
-            state = data
+	# Set both the object's state to the one received and the global state.
+    # This helps me avoid writing to the node that reported the state change
+    self.d = data
+    # Set the shared state to the recieved state so that others can synch
+    global state
+    with self.lock:
+        state = data
 
 
 class BleThread(Peripheral, threading.Thread):
@@ -31,12 +33,15 @@ class BleThread(Peripheral, threading.Thread):
     ## @var EXCEPTION_WAIT_TIME
     # Time of waiting after an exception has been raiesed or connection lost
     EXCEPTION_WAIT_TIME = 10
+    # We'll write to this
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
     def __init__(self, peripheral_addr, lock):
         threading.Thread.__init__(self)
         self.lock = lock
+        self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
 #        global state
+        # Create the BluePy objects for this node
     	Peripheral.__init__(self, peripheral_addr, addrType = "random")
     	self.delegate = MyDelegate(peripheral_addr, self.lock)
     	self.withDelegate(self.delegate)
@@ -56,19 +61,22 @@ class BleThread(Peripheral, threading.Thread):
         while self.connected:
     	    try:
                 if self.waitForNotifications(self.WAIT_TIME):
+                    # Update state to the one from its delegate object
                     if self.featherState != self.delegate.d:
                         self.featherState = self.delegate.d
-                        #map(self.broadcast, peripherals.values())  # This is where failure occurs
         	    
-		    # Synchronize the feather's state with the global one
-        	    with self.lock:
-            	        if self.featherState != state:
-                            txh = self.getCharacteristics(uuid=self.txUUID)[0]
-                	    try:
-                    		txh.write(self.featherState, True) # Note, this succeeds
-                    		self.featherState = state
-                	    except BTLEException:
-                    		print BTLEException.message
+                    # Synchronize the feather's state with the global one
+            	    with self.lock:
+                        global state
+                        # If the feather's state matches the global there's nothing to do
+                        # Otherwise, sync 
+                        if self.featherState != state:
+                    	    try:
+                        		txh.write(self.featherState, True) # Note, this succeeds
+                        		self.featherState = state
+                    	    except BTLEException:
+                        		print "BTLEException caught when writing state"
+                                print BTLEException.message
 
             except BaseException, e:
                 print "BaseException caught: " + e.message      # This is most commonly caught error
@@ -89,26 +97,11 @@ class BleThread(Peripheral, threading.Thread):
                 self.connected = False
     		
 
-#    def broadcast(self, p):
-#        if(self.addr == p.addr):
-#            return
-#        with lock:
-#            txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
-#        try:
-#	       txh.write(self.featherState, True) # Note, this succeeds
-#        except BTLEException:
-#            print BTLEException.message
-
 
 _devicesToFind = "Adafruit Bluefruit LE"
 peripherals = {}
 scanner = Scanner(0)
-lock = threading.RLock()
-# I considered a Queue but it's not the right construct for sharing state between threads.
-# Note I only want to hold a single state. A potential bug is that the Queue will block new puts until the item is consumed.
-# Wait, this isn't the behavior I want. I want a state to be recorded so that multiple threads can get it. Queues are like stacks
-# and Queue.get will remove and return an item. Not what I want. 
-#queue = Queue(maxsize=1) 
+lock = threading.RLock() 
 state = ""
 
 
@@ -121,12 +114,13 @@ while True:
             # Note, it would be nice to remove a device when it goes offline as opposed to when it comes back
             # To do this I'd need something like a ping...dunno what best practice is
             if d.addr in peripherals:
-	        with lock:
+    	        with lock:
                     del peripherals[d.addr]
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
                     t = BleThread(d.addr, lock)
+
 		    with lock:
 		        peripherals[d.addr] = t
                     t.start()
