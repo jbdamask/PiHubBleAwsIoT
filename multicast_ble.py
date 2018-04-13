@@ -75,7 +75,7 @@ class BleThread(Peripheral, threading.Thread):
                         		txh.write(self.featherState, True) # Note, this succeeds
                         		self.featherState = state
                     	    except BTLEException:
-                        		print "BTLEException caught when writing state"
+                                print "BTLEException caught when writing state"
                                 print BTLEException.message
 
             except BaseException, e:
