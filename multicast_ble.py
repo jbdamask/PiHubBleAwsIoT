@@ -9,18 +9,18 @@ def DBG(*args):
 
 class MyDelegate(DefaultDelegate):
 
-    def __init__(self, addr):
+    def __init__(self, addr, lock):
         DefaultDelegate.__init__(self)
 	self.id = addr
+	self.lock = lock
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
 	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
 	self.d = data
-    global lock
-    global state
-    with lock:
-        state = data
+        global state
+        with self.lock:
+            state = data
 
 
 class BleThread(Peripheral, threading.Thread):
@@ -33,12 +33,12 @@ class BleThread(Peripheral, threading.Thread):
     EXCEPTION_WAIT_TIME = 10
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
-    def __init__(self, peripheral_addr):
+    def __init__(self, peripheral_addr, lock):
         threading.Thread.__init__(self)
-        global lock
-        global state
+        self.lock = lock
+#        global state
     	Peripheral.__init__(self, peripheral_addr, addrType = "random")
-    	self.delegate = MyDelegate(peripheral_addr)
+    	self.delegate = MyDelegate(peripheral_addr, self.lock)
     	self.withDelegate(self.delegate)
     	self.connected = True
     	self.featherState = ""
@@ -59,8 +59,19 @@ class BleThread(Peripheral, threading.Thread):
                     if self.featherState != self.delegate.d:
                         self.featherState = self.delegate.d
                         #map(self.broadcast, peripherals.values())  # This is where failure occurs
-    	    except BaseException, e:
-                print "BaseException caught: " + e.message	# This is most commonly caught error
+        	    
+		    # Synchronize the feather's state with the global one
+        	    with self.lock:
+            	        if self.featherState != state:
+                            txh = self.getCharacteristics(uuid=self.txUUID)[0]
+                	    try:
+                    		txh.write(self.featherState, True) # Note, this succeeds
+                    		self.featherState = state
+                	    except BTLEException:
+                    		print BTLEException.message
+
+            except BaseException, e:
+                print "BaseException caught: " + e.message      # This is most commonly caught error
                 self.connected = False
             except BTLEException, e:
                 print "BTLEException caught from peripheral " + self.addr
@@ -72,32 +83,21 @@ class BleThread(Peripheral, threading.Thread):
                     time.sleep(self.EXCEPTION_WAIT_TIME)
                 else:
                     raise
-    	    except Exception:
+            except Exception:
                 print "Caught unknown exception from peripheral " + self.addr
                 print Exception.message
                 self.connected = False
-
-        # Synchronize the feather's state with the global one
-        with lock:
-            if self.featherState != state:
-                txh = self.getCharacteristics(uuid=self.txUUID)[0]
-                try:
-                    txh.write(self.featherState, True) # Note, this succeeds
-                    self.featherState = state
-                except BTLEException:
-                    print BTLEException.message
-
     		
 
-    def broadcast(self, p):
-        if(self.addr == p.addr):
-            return
-        with lock:
-            txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
-        try:
-	       txh.write(self.featherState, True) # Note, this succeeds
-        except BTLEException:
-            print BTLEException.message
+#    def broadcast(self, p):
+#        if(self.addr == p.addr):
+#            return
+#        with lock:
+#            txh = peripherals[p.addr].getCharacteristics(uuid=self.txUUID)[0]
+#        try:
+#	       txh.write(self.featherState, True) # Note, this succeeds
+#        except BTLEException:
+#            print BTLEException.message
 
 
 _devicesToFind = "Adafruit Bluefruit LE"
@@ -126,7 +126,7 @@ while True:
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
-                    t = BleThread(d.addr)
+                    t = BleThread(d.addr, lock)
 		    with lock:
 		        peripherals[d.addr] = t
                     t.start()
