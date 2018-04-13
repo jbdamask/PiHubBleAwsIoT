@@ -10,19 +10,19 @@ class MyDelegate(DefaultDelegate):
 
     def __init__(self, addr, lock):
         DefaultDelegate.__init__(self)
-	self.id = addr
-	self.lock = lock
+    	self.id = addr
+    	self.lock = lock
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
-	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
-	# Set both the object's state to the one received and the global state.
-    # This helps me avoid writing to the node that reported the state change
-    self.d = data
-    # Set the shared state to the recieved state so that others can synch
-    global state
-    with self.lock:
-        state = data
+    	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+    	# Set both the object's state to the one received and the global state.
+        # This helps me avoid writing to the node that reported the state change
+        self.d = data
+        # Set the shared state to the recieved state so that others can synch
+        global state
+        with self.lock:
+            state = data
 
 
 class BleThread(Peripheral, threading.Thread):
