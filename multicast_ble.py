@@ -40,16 +40,18 @@ class BleThread(Peripheral, threading.Thread):
     	Peripheral.__init__(self, peripheral_addr, addrType = "random")
         threading.Thread.__init__(self)
         self.lock = lock
+	# Set up our WRITE characteristic
         self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
         global state
         # Create the BluePy objects for this node
     	self.delegate = MyDelegate(peripheral_addr, self.lock)
     	self.withDelegate(self.delegate)
     	self.connected = True
-    	self.featherState = state
+    	self.featherState = ""
 
         print " Configuring RX to notify me on change"
         try:
+	    # Configure Feather to notify us on a change
             self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
     	except BaseException:
             print "BaseException caught when subscribing to notifications for:  " + self.addr
@@ -73,7 +75,6 @@ class BleThread(Peripheral, threading.Thread):
                     # Otherwise, sync 
                     if self.featherState != state:
                         try:
-			    print "Writing state to Feather: " + self.addr
                             self.txh.write(state, True) 
                             self.featherState = state
                     	except BTLEException:
