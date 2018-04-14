@@ -29,7 +29,7 @@ class BleThread(Peripheral, threading.Thread):
     
     ## @var WAIT_TIME
     # Time of waiting for notifications in seconds
-    WAIT_TIME = 0.3
+    WAIT_TIME = 0.1
     ## @var EXCEPTION_WAIT_TIME
     # Time of waiting after an exception has been raiesed or connection lost
     EXCEPTION_WAIT_TIME = 10
@@ -37,16 +37,16 @@ class BleThread(Peripheral, threading.Thread):
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
     def __init__(self, peripheral_addr, lock):
+    	Peripheral.__init__(self, peripheral_addr, addrType = "random")
         threading.Thread.__init__(self)
         self.lock = lock
         self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
-#        global state
+        global state
         # Create the BluePy objects for this node
-    	Peripheral.__init__(self, peripheral_addr, addrType = "random")
     	self.delegate = MyDelegate(peripheral_addr, self.lock)
     	self.withDelegate(self.delegate)
     	self.connected = True
-    	self.featherState = ""
+    	self.featherState = state
 
         print " Configuring RX to notify me on change"
         try:
@@ -61,23 +61,24 @@ class BleThread(Peripheral, threading.Thread):
         while self.connected:
     	    try:
                 if self.waitForNotifications(self.WAIT_TIME):
+		    print "Updating Feather's state to match delegate"
                     # Update state to the one from its delegate object
                     if self.featherState != self.delegate.d:
                         self.featherState = self.delegate.d
         	    
-                    # Synchronize the feather's state with the global one
-            	    with self.lock:
-                        global state
-                        # If the feather's state matches the global there's nothing to do
-                        # Otherwise, sync 
-                        if self.featherState != state:
-                    	    try:
-                        		txh.write(self.featherState, True) # Note, this succeeds
-                        		self.featherState = state
-                    	    except BTLEException:
-                                print "BTLEException caught when writing state"
-                                print BTLEException.message
-
+                # Synchronize the feather's state with the global one
+            	with self.lock:
+                    global state
+                    # If the feather's state matches the global there's nothing to do
+                    # Otherwise, sync 
+                    if self.featherState != state:
+                        try:
+			    print "Writing state to Feather: " + self.addr
+                            self.txh.write(state, True) 
+                            self.featherState = state
+                    	except BTLEException:
+                            print "BTLEException caught when writing state"
+                            print BTLEException.message
             except BaseException, e:
                 print "BaseException caught: " + e.message      # This is most commonly caught error
                 self.connected = False
@@ -94,16 +95,18 @@ class BleThread(Peripheral, threading.Thread):
             except Exception:
                 print "Caught unknown exception from peripheral " + self.addr
                 print Exception.message
-                self.connected = False
-    		
+                self.connected = False   		
 
 
+# Only connect to devices advertising this name
 _devicesToFind = "Adafruit Bluefruit LE"
+# Initialize Feather registry
 peripherals = {}
+# Initialize Peripheral scanner
 scanner = Scanner(0)
+# Resources shared by threads
 lock = threading.RLock() 
-state = ""
-
+state = "21420498"
 
 while True:
     devices = scanner.scan(2)
@@ -120,10 +123,9 @@ while True:
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
                     t = BleThread(d.addr, lock)
-
 		    with lock:
-		        peripherals[d.addr] = t
+	                peripherals[d.addr] = t
                     t.start()
-        except:
+	except:
             print "Unknown error"
             print sys.exc_info()[0]
