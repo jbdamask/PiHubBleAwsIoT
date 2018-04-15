@@ -63,7 +63,7 @@ The biggest PITA for me was figuring out the handle for RX notifications. It's w
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Kudos
 
