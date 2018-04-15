@@ -1,3 +1,27 @@
+#!/usr/bin/python
+##############################################################################################
+# File: multicast_ble.py
+# Created: April 2018
+# Author: John B Damask
+# GitHub: https://github.com/jbdamask
+# Purpose: Turns a Raspberry Pi into a hub for Adafruit Feather Bluefruit LE (Bluetooth low energy)
+#	   devices. When run, it will scan the area for Feathers, register them and set
+#	   their respective states to a shared global. 
+#	   The idea is that one or more of the registered Feathers act as a master and
+#	   can set the state for all others. So, for example, combine this with a "parent"
+#	   Feather running https://github.com/jbdamask/TouchBleLights and "child" Feathers
+#	   running https://github.com/jbdamask/BleLights. 
+# Synopsis: sudo python multicast_ble.py
+#	   To run on boot, do the following:
+#	   $ chmod +x multicast_ble.py
+#	   $ sudo nano /etc/rc.local
+#	   Add lines before exit(0):
+#		# Start multicast script
+#		/home/pi/Documents/PiHubBle/multicast_ble.py &	
+#
+# Kudos: Adafruit is awesome. Buy your products from them (I don't work there)
+##############################################################################################
+
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
 import threading, binascii, sys
 
