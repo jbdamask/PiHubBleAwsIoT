@@ -42,7 +42,8 @@ The biggest PITA for me was figuring out the handle for RX notifications. It's w
 ```print(self.p.writeCharacteristic(35, b"\x01\x00", withResponse=True))```
 
 > So what is 35? Well according to btle.py for this feather, UART handles can be between 31 and 38. I've seen 37 documented elsewhere, which caused me hours of pain
-```Service <uuid=6e400001-b5a3-f393-e0a9-e50e24dcca9e handleStart=31 handleEnd=38> :
+```
+Service <uuid=6e400001-b5a3-f393-e0a9-e50e24dcca9e handleStart=31 handleEnd=38> :
     Characteristic <6e400003-b5a3-f393-e0a9-e50e24dcca9e>, hnd=0x20, supports NOTIFY
     Characteristic <6e400002-b5a3-f393-e0a9-e50e24dcca9e>, hnd=0x24, supports WRITE
 ```
