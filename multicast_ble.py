@@ -124,7 +124,8 @@ class BleThread(Peripheral, threading.Thread):
 
 
 # Only connect to devices advertising this name
-_devicesToFind = "Adafruit Bluefruit LE"
+#_devicesToFind = "Adafruit Bluefruit LE"
+_devicesToFind = "TouchLightsBle"   # Feather device name has been reset to this
 # Initialize Feather registry
 peripherals = {}
 # Initialize Peripheral scanner
