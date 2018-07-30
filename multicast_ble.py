@@ -24,6 +24,7 @@
 
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
 import threading, binascii, sys
+from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
 
 def DBG(*args):
