@@ -52,6 +52,7 @@ class MyDelegate(DefaultDelegate):
         with self.lock:
             state = data
         # Update the shadow
+        json_payload = '{"state":{"desired":{"property":' + str(self.d) + '}}}'
         shadow.shadowUpdate(self.d, self.customShadowCallback_Update, 5)
 
     # AWS IoT - Custom Shadow callback
