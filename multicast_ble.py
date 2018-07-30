@@ -59,7 +59,7 @@ class MyDelegate(DefaultDelegate):
         shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
 
     # AWS IoT - Custom Shadow callback
-    def customShadowCallback_Update(payload, responseStatus, token):
+    def customShadowCallback_Update(self, payload, responseStatus, token):
         # payload is a JSON string ready to be parsed using json.loads(...)
         # in both Py2.x and Py3.x
         if responseStatus == "timeout":
