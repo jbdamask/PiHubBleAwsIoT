@@ -98,7 +98,7 @@ class AWSIoTMQTTShadowClientGenerator:
         self._reported_state = {}
         self._devices = []
 
-    def update(self, JSONPayload, shadow_callback, wtf):
+    def shadowUpdate(self, JSONPayload, shadow_callback, wtf):
         self.deviceShadowHandler.shadowUpdate(JSONPayload, shadow_callback, wtf)
 
 
