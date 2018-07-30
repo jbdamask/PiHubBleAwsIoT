@@ -136,6 +136,20 @@ scanner = Scanner(0)
 lock = threading.RLock()
 state = "21420498"
 
+def createShadow():
+    """
+    Create the AWS IoT shadow object for this thing
+    """
+    #!!!!!!!!!!!!! HARDCODING ALERT !!!!!!!!!!!!!#
+    shadow = AWSIoTMQTTShadowClientGenerator("a2i4zihblrm3ge.iot.us-east-1.amazonaws.com",
+                                         "/home/pi/AwsIot/root-CA.crt",
+                                         "/home/pi/AwsIot/PiHubBleIotDownstairs.cert.pem",
+                                         "/home/pi/AwsIot/PiHubBleIotDownstairs.private.key",
+                                         "pi-ble-broker-1",
+                                         "pi",
+                                         False
+                                         )
+
 while True:
     devices = scanner.scan(2)
     for d in devices:
