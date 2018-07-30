@@ -30,17 +30,18 @@ def DBG(*args):
     msg = " ".join([str(a) for a in args])
     print(msg)
 
+
 class MyDelegate(DefaultDelegate):
 
     def __init__(self, addr, lock):
         DefaultDelegate.__init__(self)
-    	self.id = addr
-    	self.lock = lock
+        self.id = addr
+        self.lock = lock
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
-    	DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
-    	# Set both the object's state to the one received and the global state.
+        DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
         self.d = data
         # Set the shared state to the recieved state so that others can synch
@@ -50,7 +51,6 @@ class MyDelegate(DefaultDelegate):
 
 
 class BleThread(Peripheral, threading.Thread):
-    
     ## @var WAIT_TIME
     # Time of waiting for notifications in seconds
     WAIT_TIME = 0.1
@@ -61,51 +61,51 @@ class BleThread(Peripheral, threading.Thread):
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
     def __init__(self, peripheral_addr, lock):
-    	Peripheral.__init__(self, peripheral_addr, addrType = "random")
+        Peripheral.__init__(self, peripheral_addr, addrType="random")
         threading.Thread.__init__(self)
         self.lock = lock
-	# Set up our WRITE characteristic
+        # Set up our WRITE characteristic
         self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
         global state
         # Create the BluePy objects for this node
-    	self.delegate = MyDelegate(peripheral_addr, self.lock)
-    	self.withDelegate(self.delegate)
-    	self.connected = True
-    	self.featherState = ""
+        self.delegate = MyDelegate(peripheral_addr, self.lock)
+        self.withDelegate(self.delegate)
+        self.connected = True
+        self.featherState = ""
 
         print " Configuring RX to notify me on change"
         try:
-	    # Configure Feather to notify us on a change
+            # Configure Feather to notify us on a change
             self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
-    	except BaseException:
+        except BaseException:
             print "BaseException caught when subscribing to notifications for:  " + self.addr
             print BaseException.message
-    	    raise
+            raise
 
     def run(self):
         print "Starting Thread " + self.addr
         while self.connected:
-    	    try:
+            try:
                 if self.waitForNotifications(self.WAIT_TIME):
-		    print "Updating Feather's state to match delegate"
+                    print "Updating Feather's state to match delegate"
                     # Update state to the one from its delegate object
                     if self.featherState != self.delegate.d:
                         self.featherState = self.delegate.d
-        	    
+
                 # Synchronize the feather's state with the global one
-            	with self.lock:
+                with self.lock:
                     global state
                     # If the feather's state matches the global there's nothing to do
                     # Otherwise, sync 
                     if self.featherState != state:
                         try:
-                            self.txh.write(state, True) 
+                            self.txh.write(state, True)
                             self.featherState = state
-                    	except BTLEException:
+                        except BTLEException:
                             print "BTLEException caught when writing state"
                             print BTLEException.message
             except BaseException, e:
-                print "BaseException caught: " + e.message      # This is most commonly caught error
+                print "BaseException caught: " + e.message  # This is most commonly caught error
                 self.connected = False
             except BTLEException, e:
                 print "BTLEException caught from peripheral " + self.addr
@@ -120,18 +120,18 @@ class BleThread(Peripheral, threading.Thread):
             except Exception:
                 print "Caught unknown exception from peripheral " + self.addr
                 print Exception.message
-                self.connected = False   		
+                self.connected = False
 
 
 # Only connect to devices advertising this name
-#_devicesToFind = "Adafruit Bluefruit LE"
-_devicesToFind = "TouchLightsBle"   # Feather device name has been reset to this
+# _devicesToFind = "Adafruit Bluefruit LE"
+_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
 # Initialize Feather registry
 peripherals = {}
 # Initialize Peripheral scanner
 scanner = Scanner(0)
 # Resources shared by threads
-lock = threading.RLock() 
+lock = threading.RLock()
 state = "21420498"
 
 while True:
@@ -143,15 +143,15 @@ while True:
             # Note, it would be nice to remove a device when it goes offline as opposed to when it comes back
             # To do this I'd need something like a ping...dunno what best practice is
             if d.addr in peripherals:
-    	        with lock:
+                with lock:
                     del peripherals[d.addr]
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
                     t = BleThread(d.addr, lock)
-		    with lock:
-	                peripherals[d.addr] = t
+                    with lock:
+                        peripherals[d.addr] = t
                     t.start()
-	except:
+        except:
             print "Unknown error"
             print sys.exc_info()[0]
