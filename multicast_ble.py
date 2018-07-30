@@ -125,17 +125,6 @@ class BleThread(Peripheral, threading.Thread):
                 self.connected = False
 
 
-# Only connect to devices advertising this name
-# _devicesToFind = "Adafruit Bluefruit LE"
-_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
-# Initialize Feather registry
-peripherals = {}
-# Initialize Peripheral scanner
-scanner = Scanner(0)
-# Resources shared by threads
-lock = threading.RLock()
-state = "21420498"
-
 def createShadow():
     """
     Create the AWS IoT shadow object for this thing
@@ -149,6 +138,21 @@ def createShadow():
                                          "pi",
                                          False
                                          )
+    return shadow
+
+
+# Only connect to devices advertising this name
+# _devicesToFind = "Adafruit Bluefruit LE"
+_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
+# Initialize Feather registry
+peripherals = {}
+# Initialize Peripheral scanner
+scanner = Scanner(0)
+# Resources shared by threads
+lock = threading.RLock()
+state = "21420498"
+shadow = createShadow()
+
 
 while True:
     devices = scanner.scan(2)
