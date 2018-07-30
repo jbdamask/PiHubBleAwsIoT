@@ -51,7 +51,8 @@ class MyDelegate(DefaultDelegate):
         global state
         with self.lock:
             state = data
-        # Update the shadow. Note we need to convert to b2a_hex
+        # Update the shadow
+        #json_payload = '{"state":{"desired":{"property":' + self.d + '}}}'
         json_payload = '{"state":{"desired":{"property":' + binascii.b2a_hex(self.d) + '}}}'
         print(json_payload)
         shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
