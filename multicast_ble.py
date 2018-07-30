@@ -51,10 +51,9 @@ class MyDelegate(DefaultDelegate):
         global state
         with self.lock:
             state = data
-        # Update the shadow
-        #json_payload = '{"state":{"desired":{"property":' + self.d + '}}}'
-        json_payload = '{"state":{"desired":{"property":' + binascii.b2a_hex(self.d) + '}}}'
-        #json_payload = '{ "MAC": 5, "color": "21430000009b"}'
+        # Update the shadow. Note this will fail
+        #json_payload = '{"state":{"desired":{"property":' + binascii.b2a_hex(self.d) + '}}}'
+        json_payload = '{"state":{"desired":{"property":' + self.d + '}}}'
         print(json_payload)
         shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
 
