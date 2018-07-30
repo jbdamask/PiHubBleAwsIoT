@@ -52,8 +52,8 @@ class MyDelegate(DefaultDelegate):
         with self.lock:
             state = data
         # Update the shadow
-        json_payload = '{"state":{"desired":{"property":' + self.d + '}}}'
-        #json_payload = '{"state":{"desired":{"property":' + binascii.b2a_hex(self.d) + '}}}'
+        #json_payload = '{"state":{"desired":{"property":' + self.d + '}}}'
+        json_payload = '{"state":{"desired":{"property":"' + binascii.b2a_hex(self.d) + '"}}}'
         print(json_payload)
         shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
 
@@ -190,6 +190,9 @@ while True:
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
+                    # for debugging
+		    if d.addr != "e0:f2:72:20:15:43":
+			continue
                     t = BleThread(d.addr, lock)
                     with lock:
                         peripherals[d.addr] = t
