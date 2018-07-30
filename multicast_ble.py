@@ -39,11 +39,11 @@ class MyDelegate(DefaultDelegate):
         DefaultDelegate.__init__(self)
         self.id = addr
         self.lock = lock
-        global shadow
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
         DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        global shadow
         # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
         self.d = data
