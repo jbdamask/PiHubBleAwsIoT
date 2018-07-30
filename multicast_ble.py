@@ -24,6 +24,7 @@
 
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
 import threading, binascii, sys
+sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I install SDK on Pi's
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
 
