@@ -23,7 +23,7 @@
 ##############################################################################################
 
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
-import threading, binascii, sys
+import threading, binascii, sys, json
 sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I install SDK on Pi's
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
@@ -39,6 +39,7 @@ class MyDelegate(DefaultDelegate):
         DefaultDelegate.__init__(self)
         self.id = addr
         self.lock = lock
+        global shadow
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
@@ -46,10 +47,27 @@ class MyDelegate(DefaultDelegate):
         # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
         self.d = data
-        # Set the shared state to the recieved state so that others can synch
+        # Set the shared state to the received state so that others can synch
         global state
         with self.lock:
             state = data
+        # Update the shadow
+        shadow.shadowUpdate(self.d, self.customShadowCallback_Update, 5)
+
+    # AWS IoT - Custom Shadow callback
+    def customShadowCallback_Update(payload, responseStatus, token):
+        # payload is a JSON string ready to be parsed using json.loads(...)
+        # in both Py2.x and Py3.x
+        if responseStatus == "timeout":
+            print("Update request " + token + " time out!")
+        if responseStatus == "accepted":
+            payloadDict = json.loads(payload)
+            print("~~~~~~~~~~~~~~~~~~~~~~~")
+            print("Update request with token: " + token + " accepted!")
+            print("property: " + str(payloadDict["state"]["desired"]["property"]))
+            print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
+        if responseStatus == "rejected":
+            print("Update request " + token + " rejected!")
 
 
 class BleThread(Peripheral, threading.Thread):
@@ -134,11 +152,12 @@ def createShadow():
                                          "/home/pi/AwsIot/root-CA.crt",
                                          "/home/pi/AwsIot/PiHubBleIotDownstairs.cert.pem",
                                          "/home/pi/AwsIot/PiHubBleIotDownstairs.private.key",
-                                         "pi-ble-broker-1",
+                                         "PiHubBleIotDownstairs",
                                          "pi",
                                          False
                                          )
     return shadow
+
 
 
 # Only connect to devices advertising this name
