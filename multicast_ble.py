@@ -53,23 +53,25 @@ class MyDelegate(DefaultDelegate):
             state = data
         # Update the shadow
         json_payload = '{"state":{"desired":{"property":"' + binascii.b2a_hex(self.d) + '"}}}'
-        print(json_payload)
-        shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
+       #print(json_payload)
+       # shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
+        shadow.shadowUpate(json_payload)
+        shadow.publish(json_payload)
 
-    # AWS IoT - Custom Shadow callback
-    def customShadowCallback_Update(self, payload, responseStatus, token):
-        # payload is a JSON string ready to be parsed using json.loads(...)
-        # in both Py2.x and Py3.x
-        if responseStatus == "timeout":
-            print("Update request " + token + " time out!")
-        if responseStatus == "accepted":
-            payloadDict = json.loads(payload)
-            print("~~~~~~~~~~~~~~~~~~~~~~~")
-            print("Update request with token: " + token + " accepted!")
-            print("property: " + str(payloadDict["state"]["desired"]["property"]))
-            print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
-        if responseStatus == "rejected":
-            print("Update request " + token + " rejected!")
+    # # AWS IoT - Custom Shadow callback
+    # def customShadowCallback_Update(self, payload, responseStatus, token):
+    #     # payload is a JSON string ready to be parsed using json.loads(...)
+    #     # in both Py2.x and Py3.x
+    #     if responseStatus == "timeout":
+    #         print("Update request " + token + " time out!")
+    #     if responseStatus == "accepted":
+    #         payloadDict = json.loads(payload)
+    #         print("~~~~~~~~~~~~~~~~~~~~~~~")
+    #         print("Update request with token: " + token + " accepted!")
+    #         print("property: " + str(payloadDict["state"]["desired"]["property"]))
+    #         print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
+    #     if responseStatus == "rejected":
+    #         print("Update request " + token + " rejected!")
 
 
 class BleThread(Peripheral, threading.Thread):

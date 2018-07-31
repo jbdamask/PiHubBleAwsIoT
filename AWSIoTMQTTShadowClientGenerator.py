@@ -9,7 +9,7 @@ Todo:
 
 """
 
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient, AWSIoTMQTTClient
 import logging
 import json
 from datetime import datetime
@@ -29,7 +29,7 @@ class ShadowCallbackContainer:
         deltaMessage = json.dumps(payloadDict["state"])
         print(str(datetime.now()) + " " + deltaMessage)
         # update the device using our NotificationHandler delegate object
-        self.notificationDelegate.notify(payload)
+       # self.notificationDelegate.notify(payload)
         print(str(datetime.now()) + " Update the reported state")
         newPayload = '{"state":{"reported":' + deltaMessage + '}}'
         self.deviceShadowInstance.shadowUpdate(newPayload, None, 5)
@@ -38,6 +38,7 @@ class ShadowCallbackContainer:
     # Notification delegate knows how to notify other stuff
     def setNotificationDelegate(self, notificationDelegate):
         self.notificationDelegate = notificationDelegate
+
 
 
 class AWSIoTMQTTShadowClientGenerator:
@@ -50,6 +51,7 @@ class AWSIoTMQTTShadowClientGenerator:
         self.useWebsocket = useWebsocket
         self.thingName = thingName
         self.clientId = clientId
+        self.topic = "lights"
 
         if useWebsocket and certificatePath and privateKeyPath:
             print("X.509 cert authentication and WebSocket are mutual exclusive. Please pick one.")
@@ -77,14 +79,27 @@ class AWSIoTMQTTShadowClientGenerator:
             self.myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(clientId)
             self.myAWSIoTMQTTShadowClient.configureEndpoint(host, 8883)
             self.myAWSIoTMQTTShadowClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
+            # Now MQTT Client
+            self.myAWSIoTMQTTClient = AWSIoTMQTTClient(clientId)
+            self.myAWSIoTMQTTClient.configureEndpoint(host, 8883)
+            self.myAWSIoTMQTTClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
 
         # AWSIoTMQTTShadowClient configuration
         self.myAWSIoTMQTTShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
         self.myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
         self.myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
+        # AWSIoTMQTTClient connection configuration
+        self.myAWSIoTMQTTClient.configureAutoReconnectBackoffTime(1, 32, 20)
+        self.myAWSIoTMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
+        self.myAWSIoTMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
+        self.myAWSIoTMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
+        self.myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
         # Connect to AWS IoT
         self.myAWSIoTMQTTShadowClient.connect()
+        # Connect and subscribe to AWS IoT
+        self.myAWSIoTMQTTClient.connect()
+        self.myAWSIoTMQTTClient.subscribe(self.topic, 1, self.customMqttCallback)
 
         # Create a deviceShadow with persistent subscription
         self.deviceShadowHandler = self.myAWSIoTMQTTShadowClient.createShadowHandlerWithName(thingName, True)
@@ -98,9 +113,16 @@ class AWSIoTMQTTShadowClientGenerator:
         self._reported_state = {}
         self._devices = []
 
-    def shadowUpdate(self, JSONPayload, shadow_callback, wtf):
-        self.deviceShadowHandler.shadowUpdate(JSONPayload, shadow_callback, wtf)
+    # def shadowUpdate(self, JSONPayload, shadow_callback, wtf):
+    #     #self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
+    #     self.deviceShadowHandler.shadowUpdate(JSONPayload, shadow_callback, wtf)
 
+    def shadowUpdate(self, JSONPayload):
+        #self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
+        self.deviceShadowHandler.shadowUpdate(JSONPayload, self.genericCallback, 5)
+
+    def publish(self, JSONPayload):
+      self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
 
     def getState(self):
         _r = '"reported": {"ble_devices":' + json.dumps(self._reported_state.values()) + '}'
@@ -127,3 +149,25 @@ class AWSIoTMQTTShadowClientGenerator:
     def registerNotificationDelegate(self, notificationDelgate):
         #self.notificationDelgate = notificationDelgate
         self.shadowCallbackContainer_Bot.setNotificationDelegate(notificationDelgate)
+
+    # Custom MQTT message callback
+    def customMqttCallback(self, client, userdata, message):
+        print("Received a new message from the lights topic: ")
+        print(message.payload)
+        print("from topic: ")
+        print(message.topic)
+        print("--------------\n\n")
+
+    def genericCallback(self, payload, responseStatus, token):
+        # payload is a JSON string ready to be parsed using json.loads(...)
+        # in both Py2.x and Py3.x
+        if responseStatus == "timeout":
+            print("Update request " + token + " time out!")
+        if responseStatus == "accepted":
+            payloadDict = json.loads(payload)
+            print("~~~~~~~~~~~~~~~~~~~~~~~")
+            print("Update request with token: " + token + " accepted!")
+            print("property: " + str(payloadDict["state"]["desired"]["property"]))
+            print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
+        if responseStatus == "rejected":
+            print("Update request " + token + " rejected!")
