@@ -71,6 +71,8 @@ class AWSIoTMQTTShadowClientGenerator:
 
         # Init AWSIoTMQTTShadowClient
         self.myAWSIoTMQTTShadowClient = None
+        # Init AWSIoTMQTTClient
+        self.myAWSIoTMQTTClient = None
         if useWebsocket:
             self.myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(clientId, useWebsocket=True)
             self.myAWSIoTMQTTShadowClient.configureEndpoint(host, 443)
