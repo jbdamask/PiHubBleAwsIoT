@@ -88,6 +88,9 @@ class AWSIoTMQTTShadowClientGenerator:
 
         # AWSIoTMQTTShadowClient configuration
         self.myAWSIoTMQTTShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
+
+        self.myAWSIoTMQTTShadowClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
+
         self.myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
         self.myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
         # AWSIoTMQTTClient connection configuration
