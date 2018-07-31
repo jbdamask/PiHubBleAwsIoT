@@ -126,7 +126,7 @@ class AWSIoTMQTTShadowClientGenerator:
         self.deviceShadowHandler.shadowUpdate(JSONPayload, self.genericCallback, 5)
 
     def publish(self, JSONPayload):
-      self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
+        self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
 
     def getState(self):
         _r = '"reported": {"ble_devices":' + json.dumps(self._reported_state.values()) + '}'
