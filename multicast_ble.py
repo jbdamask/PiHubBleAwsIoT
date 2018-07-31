@@ -52,7 +52,6 @@ class MyDelegate(DefaultDelegate):
         with self.lock:
             state = data
         # Update the shadow
-        #json_payload = '{"state":{"desired":{"property":' + self.d + '}}}'
         json_payload = '{"state":{"desired":{"property":"' + binascii.b2a_hex(self.d) + '"}}}'
         print(json_payload)
         shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
@@ -153,8 +152,8 @@ def createShadow():
     #!!!!!!!!!!!!! HARDCODING ALERT !!!!!!!!!!!!!#
     shadow = AWSIoTMQTTShadowClientGenerator("a2i4zihblrm3ge.iot.us-east-1.amazonaws.com",
                                          "/home/pi/AwsIot/root-CA.crt",
-                                         "/home/pi/AwsIot/PiHubBleIotDownstairs.cert.pem",
-                                         "/home/pi/AwsIot/PiHubBleIotDownstairs.private.key",
+                                         "/home/pi/AwsIot/3ae46c3163-certificate.pem.crt",
+                                         "/home/pi/AwsIot/3ae46c3163-private.pem.key",
                                          "PiHubBleIotDownstairs",
                                          "pi",
                                          False
