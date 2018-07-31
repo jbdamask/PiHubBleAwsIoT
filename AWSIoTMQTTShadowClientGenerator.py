@@ -128,8 +128,8 @@ class AWSIoTMQTTShadowClientGenerator:
     def publish(self, JSONPayload):
         try:
             self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
-        except Exception as e:
-            print("Publish error: " + e.message)
+        except:
+            print("Publish error: ")
 
     def getState(self):
         _r = '"reported": {"ble_devices":' + json.dumps(self._reported_state.values()) + '}'
