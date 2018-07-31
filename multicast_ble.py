@@ -23,7 +23,7 @@
 ##############################################################################################
 
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
-import threading, binascii, sys, json
+import threading, binascii, sys, json, time
 sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I install SDK on Pi's
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
@@ -175,6 +175,7 @@ scanner = Scanner(0)
 lock = threading.RLock()
 state = "21420498"
 shadow = createShadow()
+time.sleep(2)
 
 
 while True:
