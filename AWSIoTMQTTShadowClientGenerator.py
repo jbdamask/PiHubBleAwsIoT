@@ -10,7 +10,7 @@ Todo:
 """
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient, AWSIoTMQTTClient
-import logging
+import logging, time
 import json
 from datetime import datetime
 
@@ -101,6 +101,7 @@ class AWSIoTMQTTShadowClientGenerator:
         self.myAWSIoTMQTTShadowClient.connect()
         # Connect and subscribe to AWS IoT
         self.myAWSIoTMQTTClient.connect()
+        time.sleep(2)
         self.myAWSIoTMQTTClient.subscribe(self.topic, 1, self.customMqttCallback)
 
         # Create a deviceShadow with persistent subscription
