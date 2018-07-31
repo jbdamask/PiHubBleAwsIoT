@@ -32,7 +32,8 @@ class ShadowCallbackContainer:
        # self.notificationDelegate.notify(payload)
         print(str(datetime.now()) + " Update the reported state")
         newPayload = '{"state":{"reported":' + deltaMessage + '}}'
-        self.deviceShadowInstance.shadowUpdate(newPayload, None, 5)
+        #self.deviceShadowInstance.shadowUpdate(newPayload, None, 5)
+        self.deviceShadowInstance.shadowUpdate(newPayload)
         print(str(datetime.now()) + " Sent.")
 
     # Notification delegate knows how to notify other stuff
