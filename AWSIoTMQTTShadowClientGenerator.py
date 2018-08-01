@@ -172,7 +172,8 @@ class AWSIoTMQTTShadowClientGenerator:
             payloadDict = json.loads(payload)
             print("~~~~~~~~~~~~~~~~~~~~~~~")
             print("Update request with token: " + token + " accepted!")
-            print("property: " + str(payloadDict["state"]["desired"]["property"]))
+           # print("property: " + str(payloadDict["state"]["desired"]["property"]))
+            print("property: " + json.dumps(payloadDict)
             print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
         if responseStatus == "rejected":
             print("Update request " + token + " rejected!")
