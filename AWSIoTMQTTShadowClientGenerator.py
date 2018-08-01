@@ -104,7 +104,8 @@ class AWSIoTMQTTShadowClientGenerator:
 
         # Create a deviceShadow with persistent subscription
         self.deviceShadowHandler = self.myAWSIoTMQTTShadowClient.createShadowHandlerWithName(thingName, True)
-        self.shadowCallbackContainer_Bot = ShadowCallbackContainer(self.deviceShadowHandler)
+        #self.shadowCallbackContainer_Bot = ShadowCallbackContainer(self.deviceShadowHandler)
+        self.shadowCallbackContainer_Bot = ShadowCallbackContainer(self)
 
         # Listen on deltas
         self.deviceShadowHandler.shadowRegisterDeltaCallback(self.shadowCallbackContainer_Bot.customShadowCallbackDelta)
