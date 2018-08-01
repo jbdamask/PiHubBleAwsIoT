@@ -23,7 +23,9 @@
 ##############################################################################################
 
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
-import threading, binascii, sys
+import threading, binascii, sys, json
+sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I install SDK on Pi's
+from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
 
 def DBG(*args):
@@ -41,13 +43,35 @@ class MyDelegate(DefaultDelegate):
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
         DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        global shadow
         # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
         self.d = data
-        # Set the shared state to the recieved state so that others can synch
+        # Set the shared state to the received state so that others can synch
         global state
         with self.lock:
             state = data
+        # Update the shadow
+        json_payload = '{"state":{"desired":{"property":"' + binascii.b2a_hex(self.d) + '"}}}'
+       #print(json_payload)
+       # shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
+        shadow.shadowUpdate(json_payload)
+        shadow.publish(json_payload)
+
+    # # AWS IoT - Custom Shadow callback
+    # def customShadowCallback_Update(self, payload, responseStatus, token):
+    #     # payload is a JSON string ready to be parsed using json.loads(...)
+    #     # in both Py2.x and Py3.x
+    #     if responseStatus == "timeout":
+    #         print("Update request " + token + " time out!")
+    #     if responseStatus == "accepted":
+    #         payloadDict = json.loads(payload)
+    #         print("~~~~~~~~~~~~~~~~~~~~~~~")
+    #         print("Update request with token: " + token + " accepted!")
+    #         print("property: " + str(payloadDict["state"]["desired"]["property"]))
+    #         print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
+    #     if responseStatus == "rejected":
+    #         print("Update request " + token + " rejected!")
 
 
 class BleThread(Peripheral, threading.Thread):
@@ -123,6 +147,23 @@ class BleThread(Peripheral, threading.Thread):
                 self.connected = False
 
 
+def createShadow():
+    """
+    Create the AWS IoT shadow object for this thing
+    """
+    #!!!!!!!!!!!!! HARDCODING ALERT !!!!!!!!!!!!!#
+    shadow = AWSIoTMQTTShadowClientGenerator("a2i4zihblrm3ge.iot.us-east-1.amazonaws.com",
+                                         "/home/pi/AwsIot/root-CA.crt",
+                                         "/home/pi/AwsIot/3ae46c3163-certificate.pem.crt",
+                                         "/home/pi/AwsIot/3ae46c3163-private.pem.key",
+                                         "PiHubBleIotDownstairs",
+                                         "pi",
+                                         False
+                                         )
+    return shadow
+
+
+
 # Only connect to devices advertising this name
 # _devicesToFind = "Adafruit Bluefruit LE"
 _devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
@@ -133,6 +174,8 @@ scanner = Scanner(0)
 # Resources shared by threads
 lock = threading.RLock()
 state = "21420498"
+shadow = createShadow()
+
 
 while True:
     devices = scanner.scan(2)
@@ -148,6 +191,9 @@ while True:
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
+                    # for debugging
+		    if d.addr != "e0:f2:72:20:15:43":
+			continue
                     t = BleThread(d.addr, lock)
                     with lock:
                         peripherals[d.addr] = t
