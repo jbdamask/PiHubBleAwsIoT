@@ -72,38 +72,35 @@ class AWSIoTMQTTShadowClientGenerator:
 
         # Init AWSIoTMQTTShadowClient
         self.myAWSIoTMQTTShadowClient = None
-        # Init AWSIoTMQTTClient
-        self.myAWSIoTMQTTClient = None
-        if useWebsocket:
-            self.myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(clientId, useWebsocket=True)
-            self.myAWSIoTMQTTShadowClient.configureEndpoint(host, 443)
-            self.myAWSIoTMQTTShadowClient.configureCredentials(rootCAPath)
-        else:
-            self.myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(clientId)
-            self.myAWSIoTMQTTShadowClient.configureEndpoint(host, 8883)
-            self.myAWSIoTMQTTShadowClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
-            # Now MQTT Client
-            self.myAWSIoTMQTTClient = AWSIoTMQTTClient(clientId)
-            self.myAWSIoTMQTTClient.configureEndpoint(host, 8883)
-            self.myAWSIoTMQTTClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
-
+        self.myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(clientId)
         # AWSIoTMQTTShadowClient configuration
+        self.myAWSIoTMQTTShadowClient.configureEndpoint(host, 8883)
+        self.myAWSIoTMQTTShadowClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
         self.myAWSIoTMQTTShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
         self.myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
         self.myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
-        # AWSIoTMQTTClient connection configuration
+        # Connect to AWS IoT
+        self.myAWSIoTMQTTShadowClient.connect()
+        time.sleep(2)
+
+        # Init AWSIoTMQTTClient
+        self.myAWSIoTMQTTClient = self.myAWSIoTMQTTShadowClient.getMQTTConnection()
+        #self.myAWSIoTMQTTClient = None
+        #self.myAWSIoTMQTTClient = AWSIoTMQTTClient(clientId)
+        # MQTTClient configuration
+#        self.myAWSIoTMQTTClient.configureEndpoint(host, 8883)
+#        self.myAWSIoTMQTTClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
         self.myAWSIoTMQTTClient.configureAutoReconnectBackoffTime(1, 32, 20)
         self.myAWSIoTMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
         self.myAWSIoTMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
         self.myAWSIoTMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
         self.myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
-        # Connect to AWS IoT
-        self.myAWSIoTMQTTShadowClient.connect()
-        # Connect and subscribe to AWS IoT
-        self.myAWSIoTMQTTClient.connect()
-        time.sleep(2)
+        # Subscribe to MQTT topic
+       # self.myAWSIoTMQTTClient.connect()
         self.myAWSIoTMQTTClient.subscribe(self.topic, 1, self.customMqttCallback)
+
+
 
         # Create a deviceShadow with persistent subscription
         self.deviceShadowHandler = self.myAWSIoTMQTTShadowClient.createShadowHandlerWithName(thingName, True)

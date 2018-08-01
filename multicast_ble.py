@@ -56,7 +56,7 @@ class MyDelegate(DefaultDelegate):
        #print(json_payload)
        # shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
         shadow.shadowUpdate(json_payload)
-        shadow.publish(json_payload)
+       # shadow.publish(json_payload)
 
     # # AWS IoT - Custom Shadow callback
     # def customShadowCallback_Update(self, payload, responseStatus, token):
