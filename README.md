@@ -1,6 +1,11 @@
 # PiHubBle
 
-Turns a Raspberry Pi into a hub for Adafruit Feather Bluefruit LE (Bluetooth low energy) devices. When run, it will scan the area for Feathers, register them and set their respective states to a shared global. The idea is that one or more of the registered Feathers act as a master and can set the state for all others. So, for example, combine this with a "parent" Feather running https://github.com/jbdamask/TouchBleLights and "child" Feathers running https://github.com/jbdamask/BleLights.
+Turns a Raspberry Pi into a hub for Adafruit Feather Bluefruit LE (Bluetooth low energy) devices.
+When run, it will scan the area for Feathers, register them and set their respective states to a shared global.
+The idea is that one or more of the registered Feathers act as a master and can set the state for all others.
+So, for example, combine this with a Feather running https://github.com/jbdamask/TouchBleLights.
+
+This code also adds AWS IOT functionality so that multiple PiHubs can talk via MQTT
 
 ## Synopsis
 
@@ -23,12 +28,14 @@ Add lines before exit(0):
 
 ## Software
 
-* https://github.com/IanHarvey/bluepy
+* [Bluepy](https://github.com/IanHarvey/bluepy)
 * https://github.com/mkieboom/raspberrypi-bluez (Nice Ansible script to update the old version of bluez that comes with Raspian)
+* [AWS IoT Core](https://aws.amazon.com/iot-core/)
+* [AWS IOT Python SDK](https://github.com/aws/aws-iot-device-sdk-python)
 
 ## Troubleshooting
 
-The biggest PITA for me was figuring out the handle for RX notifications. It's weird because I'm not actually listening to RX; instead I'm writing (TX) to the RX handle. [This post](https://github.com/IanHarvey/bluepy/issues/83) describes how to find it. My notes (for posterity):
+The biggest PITA for me was figuring out the handle for RX notifications. [This post](https://github.com/IanHarvey/bluepy/issues/83) describes how to find it. My notes (for posterity):
 
 > Turn on hcidump and run bluetoothctl. Connect to Feather, select the RX characteristic and set notify on. Then touch a wire (to send data). Hopefully, I’ll see how it turned on notifications.
 > YES!!!!
@@ -54,12 +61,10 @@ Service <uuid=6e400001-b5a3-f393-e0a9-e50e24dcca9e handleStart=31 handleEnd=38> 
 
 
 ## ToDo
-
-* I'm going to [change the device name](https://learn.adafruit.com/bluefruit-le-micro-atmega32u4-microcontroller-usb-bluetooth-le-in-one/ble-gap#at-plus-gapdevname) on my Feathers in the future. This will let me better target the ones tracked by PiHub. I'll have to change the name to search for in this code
+* Lots
 
 ## Bugs
-
-* When new devices come online, their state should be synchronized. It's not happening
+* Many (coding for learning/information at this point)
 
 ## License
 
