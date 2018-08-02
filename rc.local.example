@@ -1,6 +1,7 @@
 #!/bin/sh -e
 
-# Example rc.local to drop in your Pi's /etc directory. You'll likely have to replace the existing one with this
+# Example rc.local to drop in your Pi's /etc directory. You'll likely have to replace the existing one with this.
+# Be sure to set the execution bit (chmod +x rc.local)
 # An easy way to check if the script is running is ps -ef | grep multicast
 
 # Uncomment the following lines for help debugging
