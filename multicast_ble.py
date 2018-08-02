@@ -153,9 +153,7 @@ def set_state(new_state):
     global lock
     global state
     with lock:
-        print("Current state: " + state)
-        print("New state: " + new_state.encode('utf-8'))
-        state = new_state.encode('utf-8')
+        state = binascii.unhexlify(new_state)
         # print(''.join(x.encode('hex') for x in new_state))
         # state = ''.join(x.encode('hex') for x in new_state)
 
