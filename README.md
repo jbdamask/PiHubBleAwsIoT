@@ -7,6 +7,10 @@ So, for example, combine this with a Feather running https://github.com/jbdamask
 
 This code also adds AWS IOT functionality so that multiple PiHubs can talk via MQTT
 
+## Related projects
+* [TouchBleLights](https://github.com/jbdamask/TouchBleLights)
+* [ButtonBleLights](https://github.com/jbdamask/ButtonBleLights)
+
 ## Synopsis
 
 ```
