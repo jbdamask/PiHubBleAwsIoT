@@ -43,7 +43,7 @@ class ShadowCallbackContainer:
 
 class AWSIoTMQTTShadowClientGenerator:
 
-    def __init__(self, host, rootCAPath, certificatePath, privateKeyPath, thingName, clientId, useWebsocket=False):
+    def __init__(self, host, rootCAPath, certificatePath, privateKeyPath, thingName, clientId, topic, useWebsocket=False):
         self.host = host
         self.rootCAPath = rootCAPath
         self.certificatePath = certificatePath
@@ -51,7 +51,8 @@ class AWSIoTMQTTShadowClientGenerator:
         self.useWebsocket = useWebsocket
         self.thingName = thingName
         self.clientId = clientId
-        self.topic = "lights"
+       # self.topic = "lights"
+        self.topic = topic
 
         if useWebsocket and certificatePath and privateKeyPath:
             print("X.509 cert authentication and WebSocket are mutual exclusive. Please pick one.")

@@ -52,10 +52,8 @@ class MyDelegate(DefaultDelegate):
         global state
         with self.lock:
             state = data
-        # Update the shadow
+        # Update the shadow and publish to the topic
         json_payload = '{"state":{"desired":{"property":"' + binascii.b2a_hex(self.d) + '"}}}'
-       #print(json_payload)
-       # shadow.shadowUpdate(json_payload, self.customShadowCallback_Update, 5)
         shadow.shadowUpdate(json_payload)
         shadow.publish(json_payload)
 
@@ -133,16 +131,6 @@ class BleThread(Peripheral, threading.Thread):
                 self.connected = False
 
 
-def createShadow():
-    """
-    Create the AWS IoT shadow object for this thing
-    """
-    #!!!!!!!!!!!!! HARDCODING ALERT !!!!!!!!!!!!!#
-    shadow = AWSIoTMQTTShadowClientGenerator(host, rootCAPath, certificatePath,
-                                             privateKeyPath, thingName, clientId, useWebsocket)
-    shadow.setContainerCallback(set_state)
-    return shadow
-
 # Sets global state in a controlled way. Called by the Shadow's MQTT callback function
 def set_state(new_state):
     global lock
@@ -151,6 +139,7 @@ def set_state(new_state):
     with lock:
         if state != ns:
             state = ns
+
 
 # Get the shadow configuration info
 parser = SafeConfigParser()
@@ -162,9 +151,9 @@ privateKeyPath = parser.get('thing', 'privateKeyPath')
 thingName = parser.get('thing', 'thingName')
 clientId = parser.get('thing', 'clientId')
 useWebsocket = parser.getboolean('thing', 'useWebsocket')
+topic = parser.getboolean('mqtt', 'topic')
 
 # Only connect to devices advertising this name
-# _devicesToFind = "Adafruit Bluefruit LE"
 _devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
 # Initialize Feather registry
 peripherals = {}
@@ -172,8 +161,10 @@ peripherals = {}
 scanner = Scanner(0)
 # Resources shared by threads
 lock = threading.RLock()
-state = "21420498"
-shadow = createShadow()
+state = "21420498" # Initialize state
+shadow = AWSIoTMQTTShadowClientGenerator(host, rootCAPath, certificatePath,
+                                         privateKeyPath, thingName, clientId, topic, useWebsocket)
+shadow.setContainerCallback(set_state)
 
 
 while True:
