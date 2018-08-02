@@ -132,7 +132,7 @@ class BleThread(Peripheral, threading.Thread):
                 self.connected = False
 
 
-def createShadow(set_state):
+def createShadow():
     """
     Create the AWS IoT shadow object for this thing
     """
