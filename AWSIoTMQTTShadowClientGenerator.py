@@ -32,7 +32,6 @@ class ShadowCallbackContainer:
        # self.notificationDelegate.notify(payload)
         print(str(datetime.now()) + " Update the reported state")
         newPayload = '{"state":{"reported":' + deltaMessage + '}}'
-        #self.deviceShadowInstance.shadowUpdate(newPayload, None, 5)
         self.deviceShadowInstance.shadowUpdate(newPayload)
         print(str(datetime.now()) + " Sent.")
 
@@ -121,7 +120,6 @@ class AWSIoTMQTTShadowClientGenerator:
 
 
     def shadowUpdate(self, JSONPayload):
-        #self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
         self.deviceShadowHandler.shadowUpdate(JSONPayload, self.genericCallback, 5)
 
     def publish(self, JSONPayload):

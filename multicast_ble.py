@@ -152,8 +152,10 @@ def createShadow():
 def set_state(new_state):
     global lock
     global state
+    ns = binascii.unhexlify(new_state)
     with lock:
-        state = binascii.unhexlify(new_state)
+        if state != ns:
+            state = ns
 
 
 # Only connect to devices advertising this name
