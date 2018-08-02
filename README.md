@@ -1,4 +1,4 @@
-# PiHubBle
+# PiHubBleAwsIoT
 
 Turns a Raspberry Pi into a hub for Adafruit Feather Bluefruit LE (Bluetooth low energy) devices.
 When run, it will scan the area for Feathers, register them and set their respective states to a shared global.
