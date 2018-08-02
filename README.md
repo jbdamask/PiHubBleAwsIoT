@@ -17,7 +17,7 @@ To run on boot, do the following:
 ```
 $ sudo nano /etc/rc.local
 Add lines before exit(0):
-	/home/pi/Documents/PiHubBle/multicast_ble.py &
+	/home/pi/PiHubBleAwsIoT/multicast_ble.py &
 ```
 
 ## Materials
