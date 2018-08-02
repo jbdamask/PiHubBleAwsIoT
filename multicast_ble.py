@@ -161,7 +161,7 @@ certificatePath = parser.get('thing', 'certificatePath')
 privateKeyPath = parser.get('thing', 'privateKeyPath')
 thingName = parser.get('thing', 'thingName')
 clientId = parser.get('thing', 'clientId')
-useWebsocket = parser.get('thing', 'useWebsocket')
+useWebsocket = parser.getboolean('thing', 'useWebsocket')
 
 # Only connect to devices advertising this name
 # _devicesToFind = "Adafruit Bluefruit LE"
