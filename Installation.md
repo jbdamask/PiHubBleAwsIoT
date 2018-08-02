@@ -38,7 +38,7 @@ Prepare Pi as AWS IOT Thing:
 8. Give thing a name (e.g. PiHubKitchen)
 9. Download connection kit
 10. Copy to your Pi
-    1. scp ~/Downloads/connect_device_package.zip pi@<ip>:/home/pi/AwsIot
+    1. scp ~/Downloads/connect_device_package.zip pi@xxx.xxx.xxx.xxx:/home/pi/AwsIot
 11. ssh to Pi and unzip connection kit
 12. From AWS Console
     1. Manage -> Things -> Thing Name -> Security -> Select Certificate -> Policies -> Select Policy -> Edit policy document
