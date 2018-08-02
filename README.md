@@ -1,11 +1,13 @@
 # PiHubBleAwsIoT
 
 Turns a Raspberry Pi into a hub for Adafruit Feather Bluefruit LE (Bluetooth low energy) devices.
-When run, it will scan the area for Feathers, register them and set their respective states to a shared global.
-The idea is that one or more of the registered Feathers act as a master and can set the state for all others.
-So, for example, combine this with a Feather running https://github.com/jbdamask/TouchBleLights.
 
-This code also adds AWS IOT functionality so that multiple PiHubs can talk via MQTT
+When run, it will scan the area for Feathers, register them and set their respective states to a shared global.
+The idea is that any of the registered Feathers can set the state for all others. This is a bit different than traditional
+master-slave (a la Phillips Hue) in that all BLE devices are state machines and changing the state of any
+one of them can change the state of all (of course, the states don't need to map to the same color/function!)
+
+This code also adds AWS IOT functionality so that multiple PiHubs can talk via MQTT.
 
 ## Related projects
 * [TouchBleLights](https://github.com/jbdamask/TouchBleLights)
