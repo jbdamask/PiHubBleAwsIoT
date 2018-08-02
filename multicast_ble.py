@@ -154,8 +154,6 @@ def set_state(new_state):
     global state
     with lock:
         state = binascii.unhexlify(new_state)
-        # print(''.join(x.encode('hex') for x in new_state))
-        # state = ''.join(x.encode('hex') for x in new_state)
 
 
 # Only connect to devices advertising this name
