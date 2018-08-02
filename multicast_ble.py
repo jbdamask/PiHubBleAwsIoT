@@ -153,7 +153,7 @@ def set_state(new_state):
     global lock
     global state
     with lock:
-        state = new_state
+        state = new_state.decode('utf-8')
 
 
 # Only connect to devices advertising this name
