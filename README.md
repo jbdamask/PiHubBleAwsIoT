@@ -65,10 +65,7 @@ Service <uuid=6e400001-b5a3-f393-e0a9-e50e24dcca9e handleStart=31 handleEnd=38> 
 
 
 ## ToDo
-* Lots
-
-## Bugs
-* Many (coding for learning/information at this point)
+* See [Issues](https://github.com/jbdamask/PiHubBleAwsIoT/issues)
 
 ## License
 
