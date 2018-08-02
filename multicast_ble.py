@@ -181,9 +181,10 @@ while True:
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
+                    print(d.addr + " : " + d.rssi)
                     # for debugging
-		    if d.addr != "e0:f2:72:20:15:43":
-			continue
+                    if d.addr != "e0:f2:72:20:15:43":
+                        continue
                     t = BleThread(d.addr, lock)
                     with lock:
                         peripherals[d.addr] = t
