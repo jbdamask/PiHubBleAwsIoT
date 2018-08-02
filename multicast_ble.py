@@ -24,6 +24,7 @@
 
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
 import threading, binascii, sys, json
+from ConfigParser import SafeConfigParser
 sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I install SDK on Pi's
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
@@ -137,14 +138,8 @@ def createShadow():
     Create the AWS IoT shadow object for this thing
     """
     #!!!!!!!!!!!!! HARDCODING ALERT !!!!!!!!!!!!!#
-    shadow = AWSIoTMQTTShadowClientGenerator("a2i4zihblrm3ge.iot.us-east-1.amazonaws.com",
-                                         "/home/pi/AwsIot/root-CA.crt",
-                                         "/home/pi/AwsIot/3ae46c3163-certificate.pem.crt",
-                                         "/home/pi/AwsIot/3ae46c3163-private.pem.key",
-                                         "PiHubBleIotDownstairs",
-                                         "pi",
-                                         False
-                                         )
+    shadow = AWSIoTMQTTShadowClientGenerator(host, rootCAPath, certificatePath,
+                                             privateKeyPath, thingName, clientId, useWebsocket)
     shadow.setContainerCallback(set_state)
     return shadow
 
@@ -157,6 +152,16 @@ def set_state(new_state):
         if state != ns:
             state = ns
 
+# Get the shadow configuration info
+parser = SafeConfigParser()
+parser.read('PiHub.cfg')
+host = parser.get('thing', 'host')
+rootCAPath = parser.get('thing', 'rootCAPath')
+certificatePath = parser.get('thing', 'certificatePath')
+privateKeyPath = parser.get('thing', 'privateKeyPath')
+thingName = parser.get('thing', 'thingName')
+clientId = parser.get('thing', 'clientId')
+useWebsocket = parser.get('thing', 'useWebsocket')
 
 # Only connect to devices advertising this name
 # _devicesToFind = "Adafruit Bluefruit LE"
