@@ -165,7 +165,8 @@ class AWSIoTMQTTShadowClientGenerator:
         print("Setting PiHub global state with new value")
         #{"state": {"desired": {"property": "2142019b"}}}
         d = json.loads(message.payload)
-        self.container_callback(d["state"]["desired"]["property"])
+        #self.container_callback(d["state"]["desired"]["property"])
+        self.container_callback(d["state"]["property"])
 
     def genericCallback(self, payload, responseStatus, token):
         # payload is a JSON string ready to be parsed using json.loads(...)
