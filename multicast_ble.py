@@ -55,7 +55,7 @@ class MyDelegate(DefaultDelegate):
         # Update the shadow and publish to the topic
         json_payload = '{"state":{"desired":{"property":"' + binascii.b2a_hex(self.d) + '"}}}'
         shadow.shadowUpdate(json_payload)
-#        shadow.publish(json_payload)
+        shadow.publish(json_payload)
 
 
 class BleThread(Peripheral, threading.Thread):
