@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+# Example rc.local to drop in your Pi's /etc directory. You'll likely have to replace the existing one with this
+
+# Uncomment the following lines for help debugging
+# exec 2> /tmp/rc.local.log  # send stderr from rc.local to a log file
+# exec 1>&2                      # send stdout to the same log file
+# set -x                         # tell sh to display commands before execution
+
+# This usually provides enough time for the Pi to connect to my wifi
+sleep 10
+
+hciconfig hci0 up
+systemctl restart bluetooth
+
+# Start PiHub
+(
+  cd /home/pi/PiHubBleAwsIoT
+  ./multicast_ble.py &
+)
+
+exit 0
