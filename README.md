@@ -33,6 +33,10 @@ Add lines before exit(0):
 * [AWS IoT Core](https://aws.amazon.com/iot-core/)
 * [AWS IOT Python SDK](https://github.com/aws/aws-iot-device-sdk-python)
 
+## Configuration
+
+Edit the PiHub.cfg file before running. 
+
 ## Troubleshooting
 
 The biggest PITA for me was figuring out the handle for RX notifications. [This post](https://github.com/IanHarvey/bluepy/issues/83) describes how to find it. My notes (for posterity):
