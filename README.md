@@ -35,7 +35,7 @@ Add lines before exit(0):
 
 ## Configuration
 
-Edit the PiHub.cfg file before running. 
+Edit the PiHub.cfg file before running.
 
 ## Troubleshooting
 
