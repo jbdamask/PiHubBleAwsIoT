@@ -151,7 +151,7 @@ privateKeyPath = parser.get('thing', 'privateKeyPath')
 thingName = parser.get('thing', 'thingName')
 clientId = parser.get('thing', 'clientId')
 useWebsocket = parser.getboolean('thing', 'useWebsocket')
-topic = parser.getboolean('mqtt', 'topic')
+topic = parser.get('mqtt', 'topic')
 
 # Only connect to devices advertising this name
 _devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
