@@ -1,7 +1,8 @@
 # Installation instructions
 
 ### Version info
-Tested with python 2.7 and bluez 5.41
+Tested with python 2.7 and bluez 5.41.
+Note that I've read of problems with bluez versions >= 5.43 as hcitools and hciconfig were deprecated.
 
 ## Steps
 From fresh Raspbian image do:
