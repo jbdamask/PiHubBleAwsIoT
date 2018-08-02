@@ -132,7 +132,7 @@ class BleThread(Peripheral, threading.Thread):
                 self.connected = False
 
 
-def createShadow():
+def createShadow(set_state):
     """
     Create the AWS IoT shadow object for this thing
     """
@@ -145,7 +145,7 @@ def createShadow():
                                          "pi",
                                          False
                                          )
-
+    shadow.setContainerCallback(set_state)
     return shadow
 
 # Sets global state in a controlled way. Called by the Shadow's MQTT callback function
