@@ -58,21 +58,6 @@ class MyDelegate(DefaultDelegate):
         shadow.shadowUpdate(json_payload)
         shadow.publish(json_payload)
 
-    # # AWS IoT - Custom Shadow callback
-    # def customShadowCallback_Update(self, payload, responseStatus, token):
-    #     # payload is a JSON string ready to be parsed using json.loads(...)
-    #     # in both Py2.x and Py3.x
-    #     if responseStatus == "timeout":
-    #         print("Update request " + token + " time out!")
-    #     if responseStatus == "accepted":
-    #         payloadDict = json.loads(payload)
-    #         print("~~~~~~~~~~~~~~~~~~~~~~~")
-    #         print("Update request with token: " + token + " accepted!")
-    #         print("property: " + str(payloadDict["state"]["desired"]["property"]))
-    #         print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
-    #     if responseStatus == "rejected":
-    #         print("Update request " + token + " rejected!")
-
 
 class BleThread(Peripheral, threading.Thread):
     ## @var WAIT_TIME
@@ -160,8 +145,15 @@ def createShadow():
                                          "pi",
                                          False
                                          )
+
     return shadow
 
+# Sets global state in a controlled way. Called by the Shadow's MQTT callback function
+def set_state(new_state):
+    global lock
+    global state
+    with lock:
+        state = new_state
 
 
 # Only connect to devices advertising this name

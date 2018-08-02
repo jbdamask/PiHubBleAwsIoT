@@ -115,9 +115,10 @@ class AWSIoTMQTTShadowClientGenerator:
         self._reported_state = {}
         self._devices = []
 
-    # def shadowUpdate(self, JSONPayload, shadow_callback, wtf):
-    #     #self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
-    #     self.deviceShadowHandler.shadowUpdate(JSONPayload, shadow_callback, wtf)
+    # This is how object will make calls to update its container object
+    def setContainer(self, cntr):
+        self.container = cntr
+
 
     def shadowUpdate(self, JSONPayload):
         #self.myAWSIoTMQTTClient.publish(self.topic, JSONPayload, 1)
@@ -162,6 +163,10 @@ class AWSIoTMQTTShadowClientGenerator:
         print("from topic: ")
         print(message.topic)
         print("--------------\n\n")
+        print("Setting PiHub global state with new value")
+        #{"state": {"desired": {"property": "2142019b"}}}
+        d = json.loads(message.payload)
+        self.container.set_state(d["state"]["desired"]["property"])
 
     def genericCallback(self, payload, responseStatus, token):
         # payload is a JSON string ready to be parsed using json.loads(...)
