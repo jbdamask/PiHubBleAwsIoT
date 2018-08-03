@@ -1,8 +1,14 @@
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral, AssignedNumbers, BTLEException
-import threading, binascii, sys, json
+import threading, binascii, sys, json, logging
 from ConfigParser import SafeConfigParser
 sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I install SDK on Pi's
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
+
+logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+
+def log_it(*args):
+    msg = " ".join([str(a) for a in args])
+    logging.debug(msg)
 
 
 def DBG(*args):
@@ -19,7 +25,8 @@ class MyDelegate(DefaultDelegate):
 
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
-        DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        #DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        log_it("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
         global shadow
         # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
@@ -45,7 +52,14 @@ class BleThread(Peripheral, threading.Thread):
     txUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
     def __init__(self, peripheral_addr, lock):
-        Peripheral.__init__(self, peripheral_addr, addrType="random")
+        try:
+            Peripheral.__init__(self, peripheral_addr, addrType="random")
+        except Exception, e:
+            log_it("Problem initializing Peripheral", e.message)
+            #print "Caught unknown exception from peripheral " + self.peripheral_addr
+            #print Exception.message
+            #self.connected = False
+
         threading.Thread.__init__(self)
         self.lock = lock
         # Set up our WRITE characteristic
