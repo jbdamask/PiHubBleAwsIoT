@@ -9,28 +9,18 @@ one of them can change the state of all (of course, the states don't need to map
 
 This code also adds AWS IOT functionality so that multiple PiHubs can talk via MQTT.
 
-## Related projects
-* [TouchBleLights](https://github.com/jbdamask/TouchBleLights)
-* [ButtonBleLights](https://github.com/jbdamask/ButtonBleLights)
-
 ## Synopsis
 
 ```
 $ sudo python multicast_ble.py
 ```
-To run on boot, do the following:
-```chmod +x multicast_ble.py ```
-```
-$ sudo nano /etc/rc.local
-Add lines before exit(0):
-	/home/pi/PiHubBleAwsIoT/multicast_ble.py &
-```
+Or you can copy rc.local.example into your /etc directory to launch on startup
 
 ## Materials
 
-* https://www.adafruit.com/product/3055
-* https://www.adafruit.com/product/1995
-* https://www.adafruit.com/product/2692
+* [Raspberry Pi 3](https://www.adafruit.com/product/3055)
+* [Pi plug](https://www.adafruit.com/product/1995)
+* [SD card](https://www.adafruit.com/product/2692)
 
 ## Software
 
@@ -42,6 +32,10 @@ Add lines before exit(0):
 ## Configuration
 
 Edit the PiHub.cfg file before running.
+
+## Related projects
+* [TouchBleLights](https://github.com/jbdamask/TouchBleLights)
+* [ButtonBleLights](https://github.com/jbdamask/ButtonBleLights)
 
 ## Troubleshooting
 
@@ -67,7 +61,7 @@ Service <uuid=6e400001-b5a3-f393-e0a9-e50e24dcca9e handleStart=31 handleEnd=38> 
 
 ## Authors
 
-* **John B Damask** [Repos](https://github.com/jbdamask)
+* [John B Damask](https://github.com/jbdamask)
 
 
 ## ToDo
@@ -80,5 +74,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Kudos
 
 * [Adafruit](http://www.adafruit.com) is awesome. Buy your products from them (I don't work there)
-* [Ian Harvey](https://github.com/IanHarveyhttps://github.com/IanHarvey)
+* [Ian Harvey](https://github.com/IanHarveyhttps://github.com/IanHarvey) for the amazing and elegant BluePy library
 * [Martijin Kieboom](https://github.com/mkieboom) for his bluez script
