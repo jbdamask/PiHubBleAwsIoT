@@ -192,6 +192,7 @@ while True:
                     with lock:
                         peripherals[d.addr] = t
                     t.start()
-        except:
-            print "Unknown error"
-            print sys.exc_info()[0]
+        except Exception, e:
+            #print "Unknown error"
+            #print sys.exc_info()[0]
+            log_it("Unknown error", e.message)
