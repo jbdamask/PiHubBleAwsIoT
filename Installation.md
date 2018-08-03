@@ -13,16 +13,14 @@ From fresh Raspbian image do:
     4. Enable ssh
 2. From console
     1. sudo su -
-    2. apt-get install git
-    3. apt-get install -y ansible
-    4. Update bluez from the Raspbian default (still 5.43 as of June 27, 2018)
-    5. apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
-    6. git clone https://github.com/mkieboom/raspberrypi-bluez
-    7. cd raspberrypi-bluez
-    8. ansible-playbook -i myhosts/raspberrypi_localhost raspberrypi-deployment.yml --connection=local
-        1. Note - Martijn hardcoded Bluez version 5.41. I know this works but I also see Ian Harvey (BluePy author) recently made things work with 5.47. Consider upgrading
-        2. Note that the last step to edit rc.local failed but I just updated the file manually (see the playbook for details)
-            1. Note: It doesn’t look like it even need these lines…in fact, it seems to screw stuff up
+    2. apt-get update
+    3. apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+    4. apt-get install -y git ansible
+    5. git clone https://github.com/mkieboom/raspberrypi-bluez
+    6. cd raspberrypi-bluez
+    7. ansible-playbook -i myhosts/raspberrypi_localhost raspberrypi-deployment.yml --connection=local
+        1. Note - Martijn hardcoded Bluez version 5.41. This is an older version but works
+        2. Note that the last step to edit rc.local fails but it's ok. I include rc.local.example to take its place anyway
 3. reboot
 4. From console:
     1. sudo pip install bluepy
