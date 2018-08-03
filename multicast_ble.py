@@ -26,7 +26,7 @@ class MyDelegate(DefaultDelegate):
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
         #DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
-        logger("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        logging.info("Received notification from: %s, %s. Data: %s", self.id, cHandle, binascii.b2a_hex(data))
         global shadow
         # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
@@ -67,7 +67,7 @@ class BleThread(Peripheral, threading.Thread):
         try:
             self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
         except Exception, e:
-            logging.debug("Problem getting characteristics", self.addr, e.message)
+            logging.debug("Problem getting characteristics from %s. %s", self.addr, e.message)
 
         global state
         # Create the BluePy objects for this node
@@ -81,13 +81,13 @@ class BleThread(Peripheral, threading.Thread):
             # Configure Feather to notify us on a change
             self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
         except Exception, e:
-            logging.debug("Problem subscribing to RX notifications", e.message)
+            logging.debug("Problem subscribing to RX notifications: %s", e.message)
 #            print "BaseException caught when subscribing to notifications for:  " + self.addr
 #            print BaseException.message
 #            raise
 
     def run(self):
-        logging.info("Starting Thread ", self.addr)
+        logging.info("Starting Thread for %s", self.addr)
         while self.connected:
             try:
                 if self.waitForNotifications(self.WAIT_TIME):
@@ -107,22 +107,22 @@ class BleThread(Peripheral, threading.Thread):
                             self.featherState = state
                        # except BTLEException:
                         except Exception, e:
-                            logging.debug("Problem writing to TX", e.message)
+                            logging.debug("Problem writing to TX: %s", e.message)
                             self.connected = False
                            # raise
                             #print "BTLEException caught when writing state"
                             #print BTLEException.message
             except BaseException, be:
                 #print "BaseException caught: " + e.message  # This is most commonly caught error
-                logging.debug("BaseException caught", be.message)
+                logging.debug("BaseException caught: %s", be.message)
                 self.connected = False
                 #raise
             except BTLEException, te:
                 #print "BTLEException caught from peripheral " + self.addr
                 #print BTLEException.message
-                logging.debug("BTLEException caught", self.addr, te.message)
+                logging.debug("BTLEException caught for %s. %s", self.addr, te.message)
                 if str(te.message) == 'Device disconnected':
-                    logging.debug("Device disconnected", self.addr)
+                    logging.debug("Device disconnected: %s", self.addr)
                     self.connected = False
                     # We don't want to call waitForNotifications and fail too often
                     time.sleep(self.EXCEPTION_WAIT_TIME)
@@ -131,7 +131,7 @@ class BleThread(Peripheral, threading.Thread):
             except Exception, e:
                 #print "Caught unknown exception from peripheral " + self.addr
                 #print Exception.message
-                logging.debug("Peripheral exception", self.addr, e.message)
+                logging.debug("Peripheral exception for %s. %s", self.addr, e.message)
                 self.connected = False
                 #raise
 
@@ -162,7 +162,7 @@ topic = parser.get('mqtt', 'topic')
 _devicesToFind = parser.get('ble', 'devicesToFind')
 #_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
 
-logging.info("Looking for devices named: ", _devicesToFind)
+logging.info("Looking for devices named: %s", _devicesToFind)
 
 # Initialize Feather registry
 peripherals = {}
@@ -200,4 +200,4 @@ while True:
         except Exception, e:
             #print "Unknown error"
             #print sys.exc_info()[0]
-            logging.debug("Unknown error", e.message)
+            logging.debug("Unknown error %s", e.message)
