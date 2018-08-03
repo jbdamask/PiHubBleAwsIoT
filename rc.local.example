@@ -20,7 +20,7 @@ sleep 20
 # Start PiHub
 (
   cd /home/pi/PiHubBleAwsIoT
-  ./multicast_ble.py &
+  python multicast_ble.py &
 )
 
 exit 0
