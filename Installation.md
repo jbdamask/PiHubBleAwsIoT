@@ -39,6 +39,7 @@ Prepare Pi as AWS IOT Thing:
 10. Copy to your Pi
     1. scp ~/Downloads/connect_device_package.zip pi@xxx.xxx.xxx.xxx:/home/pi/AwsIot
 11. ssh to Pi and unzip connection kit
+12. pip install AWSIoTPythonSDK
 12. From AWS Console
     1. Manage -> Things -> Thing Name -> Security -> Select Certificate -> Policies -> Select Policy -> Edit policy document
 13. Paste the following and click “Save as new version"
@@ -62,7 +63,9 @@ Prepare Pi as AWS IOT Thing:
 }
 ```
 Now install and configure PiHubBleAwsIoT
-1. git clone https://github.com/jbdamask/PiHubBleAwsIoT.git
-2. cd PiHubBleAwsIoT
-3. Edit configuration file to include the right certs for the Pi
-4. sudo python multicast_ble.py
+1. cd ..
+2. git clone https://github.com/jbdamask/PiHubBleAwsIoT.git
+3. cd PiHubBleAwsIoT
+4. Edit configuration file to include the right certs for the Pi
+5. sudo cp rc.local.example /etc/rc.local
+5. sudo python multicast_ble.py
