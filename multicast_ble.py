@@ -11,9 +11,9 @@ def log_it(*args):
     logging.debug(msg)
 
 
-def DBG(*args):
-    msg = " ".join([str(a) for a in args])
-    print(msg)
+# def DBG(*args):
+#     msg = " ".join([str(a) for a in args])
+#     print(msg)
 
 
 class MyDelegate(DefaultDelegate):
@@ -91,7 +91,7 @@ class BleThread(Peripheral, threading.Thread):
         while self.connected:
             try:
                 if self.waitForNotifications(self.WAIT_TIME):
-                    print "Updating Feather's state to match delegate"
+                    log_it("Updating Feather's state to match delegate")
                     # Update state to the one from its delegate object
                     if self.featherState != self.delegate.d:
                         self.featherState = self.delegate.d
@@ -122,7 +122,7 @@ class BleThread(Peripheral, threading.Thread):
                 #print BTLEException.message
                 log_it("BTLEException caught", self.addr, te.message)
                 if str(te.message) == 'Device disconnected':
-                    print self.addr + " disconnected"
+                    log_id("Device disconnected", self.addr)
                     self.connected = False
                     # We don't want to call waitForNotifications and fail too often
                     time.sleep(self.EXCEPTION_WAIT_TIME)
@@ -162,7 +162,7 @@ topic = parser.get('mqtt', 'topic')
 _devicesToFind = parser.get('ble', 'devicesToFind')
 #_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
 
-print("Looking for devices: " + _devicesToFind)
+log_it("Looking for devices: ", _devicesToFind)
 
 # Initialize Feather registry
 peripherals = {}
