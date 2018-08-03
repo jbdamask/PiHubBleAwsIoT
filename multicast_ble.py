@@ -75,10 +75,11 @@ class BleThread(Peripheral, threading.Thread):
         try:
             # Configure Feather to notify us on a change
             self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
-        except BaseException:
-            print "BaseException caught when subscribing to notifications for:  " + self.addr
-            print BaseException.message
-            raise
+        except Exception, e:
+            log_it("Problem subscribing to RX notifications", e.message)
+#            print "BaseException caught when subscribing to notifications for:  " + self.addr
+#            print BaseException.message
+#            raise
 
     def run(self):
         print "Starting Thread " + self.addr
@@ -99,26 +100,36 @@ class BleThread(Peripheral, threading.Thread):
                         try:
                             self.txh.write(state, True)
                             self.featherState = state
-                        except BTLEException:
-                            print "BTLEException caught when writing state"
-                            print BTLEException.message
-            except BaseException, e:
-                print "BaseException caught: " + e.message  # This is most commonly caught error
+                       # except BTLEException:
+                        except Exception, e:
+                            log_it("Problem writing to TX", e.message)
+                            self.connected = False
+                            raise
+                            #print "BTLEException caught when writing state"
+                            #print BTLEException.message
+            except BaseException, be:
+                #print "BaseException caught: " + e.message  # This is most commonly caught error
+                log_it("BaseException caught", be.message)
                 self.connected = False
-            except BTLEException, e:
-                print "BTLEException caught from peripheral " + self.addr
-                print BTLEException.message
-                if str(e) == 'Device disconnected':
+                raise
+            except BTLEException, te:
+                #print "BTLEException caught from peripheral " + self.addr
+                #print BTLEException.message
+                log_it("BTLEException caught", self.addr, te.message)
+                if str(te) == 'Device disconnected':
                     print self.addr + " disconnected"
                     self.connected = False
                     # We don't want to call waitForNotifications and fail too often
                     time.sleep(self.EXCEPTION_WAIT_TIME)
                 else:
                     raise
-            except Exception:
-                print "Caught unknown exception from peripheral " + self.addr
-                print Exception.message
+            except Exception, e:
+                #print "Caught unknown exception from peripheral " + self.addr
+                #print Exception.message
+                log_it("Peripheral exception", self.addr, e.message)
                 self.connected = False
+                raise
+
 
 
 # Sets global state in a controlled way. Called by the Shadow's MQTT callback function
