@@ -87,8 +87,6 @@ class BleThread(Peripheral, threading.Thread):
 #            raise
 
     def run(self):
-        print("Starting thread for " + self.addr)
-        logging.info("Starting Thread for %s", self.addr)
         while self.connected:
             try:
                 if self.waitForNotifications(self.WAIT_TIME):
@@ -197,6 +195,7 @@ while True:
                     t = BleThread(d.addr, lock)
                     with lock:
                         peripherals[d.addr] = t
+                    logging.info("Starting Thread for %s", d.addr)
                     t.start()
         except Exception, e:
             #print "Unknown error"
