@@ -2,11 +2,6 @@
 """
 Classes for AWSIoT Device shadow and Callback container. This is basically the code that comes
 with the IoT samples but I turned the client into a class (AWSIoTMQTTShadowClientGenerator)
-
-
-Todo:
-    * I need to more the device dictionary initial state to another class...doesn't belong here
-
 """
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient, AWSIoTMQTTClient
@@ -152,7 +147,6 @@ class AWSIoTMQTTShadowClientGenerator:
 
 
     def registerNotificationDelegate(self, notificationDelgate):
-        #self.notificationDelgate = notificationDelgate
         self.shadowCallbackContainer_Bot.setNotificationDelegate(notificationDelgate)
 
     # Custom MQTT message callback
