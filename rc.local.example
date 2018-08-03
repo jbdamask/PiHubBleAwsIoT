@@ -12,6 +12,11 @@
 # This usually provides enough time for the Pi to connect to my wifi.
 sleep 20
 
+# If bluez version 5.46, uncomment this section. Bluetooth doesn't start automatically so we have to bring it up
+# hciattach /dev/ttyAMA0 bcm43xx 921600 noflow -
+# hciconfig hci0 up
+# systemctl restart bluetooth
+
 # Start PiHub
 (
   cd /home/pi/PiHubBleAwsIoT
