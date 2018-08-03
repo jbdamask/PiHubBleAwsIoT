@@ -104,14 +104,14 @@ class BleThread(Peripheral, threading.Thread):
                         except Exception, e:
                             log_it("Problem writing to TX", e.message)
                             self.connected = False
-                            raise
+                           # raise
                             #print "BTLEException caught when writing state"
                             #print BTLEException.message
             except BaseException, be:
                 #print "BaseException caught: " + e.message  # This is most commonly caught error
                 log_it("BaseException caught", be.message)
                 self.connected = False
-                raise
+                #raise
             except BTLEException, te:
                 #print "BTLEException caught from peripheral " + self.addr
                 #print BTLEException.message
@@ -128,7 +128,7 @@ class BleThread(Peripheral, threading.Thread):
                 #print Exception.message
                 log_it("Peripheral exception", self.addr, e.message)
                 self.connected = False
-                raise
+                #raise
 
 
 
