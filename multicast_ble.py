@@ -87,7 +87,7 @@ class BleThread(Peripheral, threading.Thread):
 #            raise
 
     def run(self):
-        print "Starting Thread " + self.addr
+        log_it("Starting Thread ", self.addr)
         while self.connected:
             try:
                 if self.waitForNotifications(self.WAIT_TIME):
