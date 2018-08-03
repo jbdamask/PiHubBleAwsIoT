@@ -24,7 +24,6 @@ class ShadowCallbackContainer:
         deltaMessage = json.dumps(payloadDict["state"])
         print(str(datetime.now()) + " " + deltaMessage)
         # update the device using our NotificationHandler delegate object
-       # self.notificationDelegate.notify(payload)
         print(str(datetime.now()) + " Update the reported state")
         newPayload = '{"state":{"reported":' + deltaMessage + '}}'
         self.deviceShadowInstance.shadowUpdate(newPayload)
@@ -46,7 +45,6 @@ class AWSIoTMQTTShadowClientGenerator:
         self.useWebsocket = useWebsocket
         self.thingName = thingName
         self.clientId = clientId
-       # self.topic = "lights"
         self.topic = topic
 
         if useWebsocket and certificatePath and privateKeyPath:
@@ -78,13 +76,8 @@ class AWSIoTMQTTShadowClientGenerator:
         self.myAWSIoTMQTTShadowClient.connect()
         time.sleep(2)
 
-        # Init AWSIoTMQTTClient
+        # Init and configure AWSIoTMQTTClient. This is so I can publish to non-shadow topics
         self.myAWSIoTMQTTClient = self.myAWSIoTMQTTShadowClient.getMQTTConnection()
-        #self.myAWSIoTMQTTClient = None
-        #self.myAWSIoTMQTTClient = AWSIoTMQTTClient(clientId)
-        # MQTTClient configuration
-#        self.myAWSIoTMQTTClient.configureEndpoint(host, 8883)
-#        self.myAWSIoTMQTTClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
         self.myAWSIoTMQTTClient.configureAutoReconnectBackoffTime(1, 32, 20)
         self.myAWSIoTMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
         self.myAWSIoTMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
@@ -92,14 +85,10 @@ class AWSIoTMQTTShadowClientGenerator:
         self.myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
         # Subscribe to MQTT topic
-       # self.myAWSIoTMQTTClient.connect()
         self.myAWSIoTMQTTClient.subscribe(self.topic, 1, self.customMqttCallback)
-
-
 
         # Create a deviceShadow with persistent subscription
         self.deviceShadowHandler = self.myAWSIoTMQTTShadowClient.createShadowHandlerWithName(thingName, True)
-        #self.shadowCallbackContainer_Bot = ShadowCallbackContainer(self.deviceShadowHandler)
         self.shadowCallbackContainer_Bot = ShadowCallbackContainer(self)
 
         # Listen on deltas
@@ -160,7 +149,6 @@ class AWSIoTMQTTShadowClientGenerator:
         #{"state": {"desired": {"property": "2142019b"}}}
         d = json.loads(message.payload)
         self.container_callback(d["state"]["desired"]["property"])
-        #self.container_callback(d["property"])
 
     def genericCallback(self, payload, responseStatus, token):
         # payload is a JSON string ready to be parsed using json.loads(...)
@@ -171,7 +159,6 @@ class AWSIoTMQTTShadowClientGenerator:
             payloadDict = json.loads(payload)
             print("~~~~~~~~~~~~~~~~~~~~~~~")
             print("Update request with token: " + token + " accepted!")
-           # print("property: " + str(payloadDict["state"]["desired"]["property"]))
             print("property: " + json.dumps(payloadDict))
             print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
         if responseStatus == "rejected":
