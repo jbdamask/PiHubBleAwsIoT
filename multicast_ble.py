@@ -55,7 +55,7 @@ class BleThread(Peripheral, threading.Thread):
         try:
             Peripheral.__init__(self, peripheral_addr, addrType="random")
         except Exception, e:
-            logging.warning("Problem initializing Peripheral", e.message)
+            logging.warning("Problem initializing Peripheral %s", e.message)
             raise
             #print "Caught unknown exception from peripheral " + self.peripheral_addr
             #print Exception.message
