@@ -196,6 +196,7 @@ while True:
                     with lock:
                         peripherals[d.addr] = t
                     logging.info("Starting Thread for %s", d.addr)
+                    t.daemon = True
                     t.start()
         except Exception, e:
             #print "Unknown error"
