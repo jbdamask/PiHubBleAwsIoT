@@ -132,6 +132,8 @@ topic = parser.get('mqtt', 'topic')
 _devicesToFind = parser.get('ble', 'devicesToFind')
 #_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
 
+print("Looking for devices: " + _devicesToFind)
+
 # Initialize Feather registry
 peripherals = {}
 # Initialize Peripheral scanner
@@ -158,6 +160,7 @@ while True:
 
             for (adtype, desc, value) in d.getScanData():
                 if (_devicesToFind in value):
+                    print(_devicesToFind + " found in " + value)
                     # for debugging
                     #if d.addr != "e0:f2:72:20:15:43":
                         #continue
