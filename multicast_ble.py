@@ -63,7 +63,11 @@ class BleThread(Peripheral, threading.Thread):
         threading.Thread.__init__(self)
         self.lock = lock
         # Set up our WRITE characteristic
-        self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
+        try:
+            self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
+        except Exception, e:
+            log_it("Problem getting characteristics", self.addr, e.message)
+
         global state
         # Create the BluePy objects for this node
         self.delegate = MyDelegate(peripheral_addr, self.lock)
