@@ -5,7 +5,6 @@ sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
 logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
-logging.getLogger(__name__)
 
 def log_it(*args):
     msg = " ".join([str(a) for a in args])
@@ -56,7 +55,7 @@ class BleThread(Peripheral, threading.Thread):
         try:
             Peripheral.__init__(self, peripheral_addr, addrType="random")
         except Exception, e:
-            log_it("Problem initializing Peripheral", e.message)
+            logging.warning("Problem initializing Peripheral", e.message)
             raise
             #print "Caught unknown exception from peripheral " + self.peripheral_addr
             #print Exception.message
@@ -68,7 +67,7 @@ class BleThread(Peripheral, threading.Thread):
         try:
             self.txh = self.getCharacteristics(uuid=self.txUUID)[0]
         except Exception, e:
-            log_it("Problem getting characteristics", self.addr, e.message)
+            logging.debug("Problem getting characteristics", self.addr, e.message)
 
         global state
         # Create the BluePy objects for this node
@@ -77,22 +76,22 @@ class BleThread(Peripheral, threading.Thread):
         self.connected = True
         self.featherState = ""
 
-        log_it("Configuring RX to notify me on change")
+        logging.info("Configuring RX to notify me on change")
         try:
             # Configure Feather to notify us on a change
             self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
         except Exception, e:
-            log_it("Problem subscribing to RX notifications", e.message)
+            logging.debug("Problem subscribing to RX notifications", e.message)
 #            print "BaseException caught when subscribing to notifications for:  " + self.addr
 #            print BaseException.message
 #            raise
 
     def run(self):
-        log_it("Starting Thread ", self.addr)
+        logging.info("Starting Thread ", self.addr)
         while self.connected:
             try:
                 if self.waitForNotifications(self.WAIT_TIME):
-                    log_it("Updating Feather's state to match delegate")
+                    logging.info("Updating Feather's state to match delegate")
                     # Update state to the one from its delegate object
                     if self.featherState != self.delegate.d:
                         self.featherState = self.delegate.d
@@ -108,22 +107,22 @@ class BleThread(Peripheral, threading.Thread):
                             self.featherState = state
                        # except BTLEException:
                         except Exception, e:
-                            log_it("Problem writing to TX", e.message)
+                            logging.debug("Problem writing to TX", e.message)
                             self.connected = False
                            # raise
                             #print "BTLEException caught when writing state"
                             #print BTLEException.message
             except BaseException, be:
                 #print "BaseException caught: " + e.message  # This is most commonly caught error
-                log_it("BaseException caught", be.message)
+                logging.debug("BaseException caught", be.message)
                 self.connected = False
                 #raise
             except BTLEException, te:
                 #print "BTLEException caught from peripheral " + self.addr
                 #print BTLEException.message
-                log_it("BTLEException caught", self.addr, te.message)
+                logging.debug("BTLEException caught", self.addr, te.message)
                 if str(te.message) == 'Device disconnected':
-                    log_id("Device disconnected", self.addr)
+                    logging.debug("Device disconnected", self.addr)
                     self.connected = False
                     # We don't want to call waitForNotifications and fail too often
                     time.sleep(self.EXCEPTION_WAIT_TIME)
@@ -132,7 +131,7 @@ class BleThread(Peripheral, threading.Thread):
             except Exception, e:
                 #print "Caught unknown exception from peripheral " + self.addr
                 #print Exception.message
-                log_it("Peripheral exception", self.addr, e.message)
+                logging.debug("Peripheral exception", self.addr, e.message)
                 self.connected = False
                 #raise
 
@@ -163,7 +162,7 @@ topic = parser.get('mqtt', 'topic')
 _devicesToFind = parser.get('ble', 'devicesToFind')
 #_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
 
-log_it("Looking for devices: ", _devicesToFind)
+logging.info("Looking for devices named: ", _devicesToFind)
 
 # Initialize Feather registry
 peripherals = {}
@@ -201,4 +200,4 @@ while True:
         except Exception, e:
             #print "Unknown error"
             #print sys.exc_info()[0]
-            log_it("Unknown error", e.message)
+            logging.debug("Unknown error", e.message)
