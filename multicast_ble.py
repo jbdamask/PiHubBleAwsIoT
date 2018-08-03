@@ -159,7 +159,7 @@ while True:
                     del peripherals[d.addr]
 
             for (adtype, desc, value) in d.getScanData():
-                if (_devicesToFind in value):
+                if (_devicesToFind == value):
                     print(_devicesToFind + " found in " + value)
                     # for debugging
                     #if d.addr != "e0:f2:72:20:15:43":
