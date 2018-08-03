@@ -128,9 +128,10 @@ thingName = parser.get('thing', 'thingName')
 clientId = parser.get('thing', 'clientId')
 useWebsocket = parser.getboolean('thing', 'useWebsocket')
 topic = parser.get('mqtt', 'topic')
-
 # Only connect to devices advertising this name
-_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
+_devicesToFind = parser.get('ble', 'divicesToFind ')
+#_devicesToFind = "TouchLightsBle"  # Feather device name has been reset to this
+
 # Initialize Feather registry
 peripherals = {}
 # Initialize Peripheral scanner
