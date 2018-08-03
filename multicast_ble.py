@@ -116,7 +116,7 @@ class BleThread(Peripheral, threading.Thread):
                 #print "BTLEException caught from peripheral " + self.addr
                 #print BTLEException.message
                 log_it("BTLEException caught", self.addr, te.message)
-                if str(te) == 'Device disconnected':
+                if str(te.message) == 'Device disconnected':
                     print self.addr + " disconnected"
                     self.connected = False
                     # We don't want to call waitForNotifications and fail too often
