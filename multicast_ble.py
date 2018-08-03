@@ -87,6 +87,7 @@ class BleThread(Peripheral, threading.Thread):
 #            raise
 
     def run(self):
+        print("Starting thread for " + self.addr)
         logging.info("Starting Thread for %s", self.addr)
         while self.connected:
             try:
