@@ -5,6 +5,7 @@ sys.path.append("/home/pi/.local/lib/python2.7/site-packages") # This is where I
 from AWSIoTMQTTShadowClientGenerator import AWSIoTMQTTShadowClientGenerator
 
 logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+logging.getLogger(__name__)
 
 def log_it(*args):
     msg = " ".join([str(a) for a in args])
@@ -26,7 +27,7 @@ class MyDelegate(DefaultDelegate):
     # Called by BluePy when an event was received.
     def handleNotification(self, cHandle, data):
         #DBG("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
-        log_it("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
+        logger("Received notification from: ", self.id, cHandle, " send data ", binascii.b2a_hex(data))
         global shadow
         # Set both the object's state to the one received and the global state.
         # This helps me avoid writing to the node that reported the state change
@@ -76,7 +77,7 @@ class BleThread(Peripheral, threading.Thread):
         self.connected = True
         self.featherState = ""
 
-        print " Configuring RX to notify me on change"
+        log_it("Configuring RX to notify me on change")
         try:
             # Configure Feather to notify us on a change
             self.writeCharacteristic(35, b"\x01\x00", withResponse=True)
