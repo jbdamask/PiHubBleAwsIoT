@@ -81,3 +81,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * [Adafruit](http://www.adafruit.com) is awesome. Buy your products from them (I don't work there)
 * [Ian Harvey](https://github.com/IanHarveyhttps://github.com/IanHarvey)
+* [Martijin Kieboom](https://github.com/mkieboom) for his bluez script
