@@ -29,6 +29,9 @@ Or you can copy rc.local.example into your /etc directory to launch on startup
 * [AWS IoT Core](https://aws.amazon.com/iot-core/)
 * [AWS IOT Python SDK](https://github.com/aws/aws-iot-device-sdk-python)
 
+## Installation
+[Installation.md](https://github.com/jbdamask/PiHubBleAwsIoT/blob/master/Installation.md)
+
 ## Configuration
 
 Edit the PiHub.cfg file before running.
